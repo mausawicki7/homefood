@@ -3,33 +3,171 @@
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
 <main class="wp-block-group">
 
-	<!-- wp:group {"className":"hf-hero","backgroundColor":"muted","layout":{"type":"constrained"}} -->
-	<div class="wp-block-group hf-hero has-muted-background-color has-background">
-		<!-- wp:heading {"level":1,"fontSize":"x-large"} -->
-		<h1 class="wp-block-heading has-x-large-font-size">Viandas caseras, listas para calentar</h1>
-		<!-- /wp:heading -->
-		<!-- wp:paragraph -->
-		<p>Entrega en 48 hs en CABA, Zona Norte y Zona Oeste. Mínimo 7 viandas por pedido.</p>
-		<!-- /wp:paragraph -->
-		<!-- wp:buttons -->
-		<div class="wp-block-buttons">
-			<!-- wp:button -->
-			<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/viandas">Ver el catálogo</a></div>
-			<!-- /wp:button -->
+<!-- wp:html -->
+<section class="hf-container hf-section--tight">
+	<div class="hf-hero">
+		<div class="hf-hero__grid">
+			<div>
+				<span class="hf-hero__eyebrow">Viandas individuales · CABA · Zona Norte · Zona Oeste</span>
+				<h1 class="hf-hero__title">Resolvé la comida<br><em>en un click</em></h1>
+				<p class="hf-hero__lead">Viandas individuales listas para comer, con envío a domicilio en 48 horas. Elegí entre clásicas, fitness, keto y vegetarianas.</p>
+				<div class="hf-hero__actions">
+					<a class="hf-btn hf-btn--accent" href="/viandas/">Ver el catálogo</a>
+					<a class="hf-btn hf-btn--ghost-dark" href="#como-pedir">¿Cómo funciona?</a>
+				</div>
+				<div class="hf-hero__badges">
+					<span class="hf-badge">🚚 Entrega en 48 hs</span>
+					<span class="hf-badge">🧾 Mínimo $70.000 por pedido</span>
+					<span class="hf-badge">🍳 +20 años de experiencia (WorkFood)</span>
+				</div>
+			</div>
+			<div class="hf-hero__media">
+				<div class="hf-hero__media-card">🌱 Menúes caseros, fitness, veggie y keto — elaborados con ingredientes de calidad.</div>
+			</div>
 		</div>
-		<!-- /wp:buttons -->
 	</div>
-	<!-- /wp:group -->
+</section>
+<!-- /wp:html -->
 
-	<!-- wp:heading -->
-	<h2 class="wp-block-heading">Categorías</h2>
-	<!-- /wp:heading -->
-	<!-- wp:woocommerce/product-category-list {"align":"wide"} /-->
+<!-- wp:html -->
+<section class="hf-container hf-section">
+	<span class="hf-eyebrow">Elegí tu plan</span>
+	<h2>Categorías</h2>
+	<div class="hf-cats">
+		<a class="hf-cat-card" href="/viandas/?product_cat=clasicos"><span class="hf-cat-card__icon">🍲</span><span class="hf-cat-card__name">Clásicas</span></a>
+		<a class="hf-cat-card" href="/viandas/?product_cat=combos"><span class="hf-cat-card__icon">🎁</span><span class="hf-cat-card__name">Combos</span></a>
+		<a class="hf-cat-card" href="/viandas/?product_cat=fitness"><span class="hf-cat-card__icon">💪</span><span class="hf-cat-card__name">Fitness</span></a>
+		<a class="hf-cat-card" href="/viandas/?product_cat=keto"><span class="hf-cat-card__icon">🥑</span><span class="hf-cat-card__name">Keto</span></a>
+		<a class="hf-cat-card" href="/viandas/?product_cat=ensaladas-y-omelettes"><span class="hf-cat-card__icon">🥗</span><span class="hf-cat-card__name">Ensaladas y omelettes</span></a>
+		<a class="hf-cat-card" href="/viandas/?product_cat=emp-pizza"><span class="hf-cat-card__icon">🍕</span><span class="hf-cat-card__name">Tartas, empanadas, pizzas</span></a>
+		<a class="hf-cat-card" href="/viandas/?product_cat=vegetariano"><span class="hf-cat-card__icon">🌱</span><span class="hf-cat-card__name">Vegetariano</span></a>
+	</div>
+</section>
+<!-- /wp:html -->
 
-	<!-- wp:heading -->
-	<h2 class="wp-block-heading">Más pedidas</h2>
-	<!-- /wp:heading -->
-	<!-- wp:woocommerce/product-best-sellers {"columns":4} /-->
+<!-- wp:html -->
+<section class="hf-container hf-section--tight">
+	<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+		<h2>Nuestros platos recomendados</h2>
+		<a class="hf-btn hf-btn--ghost-dark" href="/viandas/">Ver todas las opciones</a>
+	</div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:woocommerce/product-collection {"queryId":1,"query":{"perPage":8,"pages":0,"offset":0,"postType":"product","orderBy":"popularity","order":"desc","inherit":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock"]},"displayLayout":{"type":"flex","columns":4},"align":"wide","className":"hf-container"} -->
+<div class="wp-block-woocommerce-product-collection alignwide hf-container">
+	<!-- wp:woocommerce/product-template -->
+		<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail"} /-->
+		<!-- wp:post-title {"isLink":true} /-->
+		<!-- wp:woocommerce/product-price /-->
+		<!-- wp:woocommerce/product-button /-->
+	<!-- /wp:woocommerce/product-template -->
+</div>
+<!-- /wp:woocommerce/product-collection -->
+
+<!-- wp:html -->
+<section id="como-pedir" class="hf-container hf-section">
+	<span class="hf-eyebrow">Guía simple</span>
+	<h2>¿Cómo hacer tu pedido?</h2>
+	<div class="hf-steps">
+		<div class="hf-step">
+			<h3>Elegí tus viandas</h3>
+			<p>Elegí un mínimo de 7 viandas ($70.000). Podés combinar la variedad y cantidad que quieras respetando ese mínimo. Recibís tu pedido 48 horas después de realizarlo.</p>
+		</div>
+		<div class="hf-step">
+			<h3>Recibí tus viandas</h3>
+			<p>Los envíos se realizan en una franja horaria de 3 horas. Asegurate de que haya alguien para recibirlas — una vez despachado el pedido no podemos volver a recibirlo.</p>
+		</div>
+	</div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section id="envios" class="hf-container hf-section--tight hf-section--cream" style="border-radius:28px;">
+	<span class="hf-eyebrow">Cobertura</span>
+	<h2>Zonas de envío</h2>
+	<div class="hf-zones">
+		<div class="hf-zone-card">
+			<h3>CABA</h3>
+			<p>Cobertura en toda la Ciudad Autónoma de Buenos Aires.</p>
+		</div>
+		<div class="hf-zone-card">
+			<h3>Zona Norte</h3>
+			<p>Billinghurst, Loma Hermosa, San Andrés, San Martín, Villa Ballester, Villa Lynch, Villa Maipú, Villa Adelina, Boulogne, Martínez, Acassuso, San Isidro, Carapachay, Florida, La Lucila, Munro, Olivos, Vicente López, Villa Martelli, San Fernando, Victoria, Tigre, Nordelta, Pacheco, Benavídez.</p>
+		</div>
+		<div class="hf-zone-card">
+			<h3>Zona Oeste</h3>
+			<p>San Justo, Ramos Mejía, Morón, Castelar, Haedo, El Palomar, Villa Sarmiento, Caseros, Ciudad Jardín, Lomas del Mirador, Ciudadela, Martín Coronado, Pablo Podestá, Sáenz Peña, Santos Lugares, Villa Bosch, Hurlingham, Ituzaingó.</p>
+		</div>
+	</div>
+
+	<h2 style="margin-top:2.5rem;">Costos de envío</h2>
+	<div class="hf-shipping-costs">
+		<div class="hf-cost-card hf-cost-card--free">
+			<span class="hf-cost-card__amount">Sin cargo</span>
+			Recibiendo tus viandas en la franja de 11 a 14 hs.
+		</div>
+		<div class="hf-cost-card hf-cost-card--paid">
+			<span class="hf-cost-card__amount">$15.000</span>
+			Recibiendo tus viandas en la franja de 18 a 21 hs.
+		</div>
+	</div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section id="tips" class="hf-container hf-section">
+	<span class="hf-eyebrow">Conservación</span>
+	<h2>Tips para calentar y disfrutar</h2>
+	<div class="hf-steps">
+		<div class="hf-step">
+			<h3>Conservación</h3>
+			<p>Se conservan hasta 3 días en heladera y 2 meses en freezer. Las ensaladas no se freezan.</p>
+		</div>
+		<div class="hf-step">
+			<h3>Microondas</h3>
+			<p>Las viandas freezadas se descongelan y calientan directo en el microondas — retirá el plástico antes de calentar.</p>
+		</div>
+		<div class="hf-step">
+			<h3>Horno</h3>
+			<p>Los platos con acabado crocante quedan mejor recalentados en horno convencional, en un recipiente apto.</p>
+		</div>
+	</div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="hf-container hf-section--tight">
+	<span class="hf-eyebrow">Testimonios</span>
+	<h2>¿Qué opinan nuestros clientes?</h2>
+	<div class="hf-testimonials">
+		<blockquote class="hf-testimonial">
+			<p class="hf-testimonial__quote">"Entreno fuerza varias veces por semana y tengo un plan con mi nutricionista. Desde que conocí Homefood estoy mucho más tranquila: sé que estoy comiendo bien, rico y acorde a mis objetivos."</p>
+			<div class="hf-testimonial__author">Clienta Homefood</div>
+		</blockquote>
+		<blockquote class="hf-testimonial">
+			<p class="hf-testimonial__quote">"Son un mimo al paladar. No solo llenan y alimentan, sino que son una explosión de sabores. Es justo lo que necesitaba para ahorrar tiempo."</p>
+			<div class="hf-testimonial__author">Clienta Homefood</div>
+		</blockquote>
+		<blockquote class="hf-testimonial">
+			<p class="hf-testimonial__quote">"Con dos trabajos se me complicaba comer sano. Las viandas de Homefood son excelentes en todos los aspectos y se adaptan a cualquier necesidad."</p>
+			<div class="hf-testimonial__author">Agostina</div>
+		</blockquote>
+	</div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="hf-container hf-section--tight">
+	<div class="hf-cta-whatsapp">
+		<div>
+			<h2>¿Tenés dudas o consultas?</h2>
+			<p>Escribinos por WhatsApp al +54 9 11 2836-8779 y te ayudamos a armar tu pedido.</p>
+		</div>
+		<a class="hf-btn hf-btn--accent" href="https://wa.me/5491128368779" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+	</div>
+</section>
+<!-- /wp:html -->
 
 </main>
 <!-- /wp:group -->

@@ -4,30 +4,40 @@
 	"settings": {
 		"appearanceTools": true,
 		"layout": {
-			"contentSize": "720px",
-			"wideSize": "1200px"
+			"contentSize": "760px",
+			"wideSize": "1280px"
 		},
 		"color": {
 			"palette": [
 				{ "slug": "base", "color": "#ffffff", "name": "Base" },
-				{ "slug": "contrast", "color": "#1a1a1a", "name": "Contraste" },
-				{ "slug": "primary", "color": "#2f6f4f", "name": "Primario (placeholder)" },
-				{ "slug": "secondary", "color": "#f2b134", "name": "Secundario (placeholder)" },
-				{ "slug": "muted", "color": "#f5f5f0", "name": "Fondo suave" }
+				{ "slug": "cream", "color": "#f7f5ee", "name": "Crema" },
+				{ "slug": "ink", "color": "#1d1d1b", "name": "Tinta" },
+				{ "slug": "muted", "color": "#67768e", "name": "Gris" },
+				{ "slug": "primary", "color": "#1e6c4f", "name": "Verde Homefood" },
+				{ "slug": "primary-dark", "color": "#134432", "name": "Verde oscuro" },
+				{ "slug": "accent", "color": "#54ac40", "name": "Verde hoja" },
+				{ "slug": "accent-soft", "color": "#e7f2df", "name": "Verde suave" },
+				{ "slug": "rust", "color": "#c1502e", "name": "Terracota" }
 			]
 		},
 		"typography": {
 			"fontSizes": [
 				{ "slug": "small", "size": "0.875rem", "name": "Pequeño" },
-				{ "slug": "medium", "size": "1rem", "name": "Mediano" },
+				{ "slug": "medium", "size": "1.0625rem", "name": "Mediano" },
 				{ "slug": "large", "size": "1.5rem", "name": "Grande" },
-				{ "slug": "x-large", "size": "2.25rem", "name": "Extra grande" }
+				{ "slug": "x-large", "size": "clamp(2rem, 1.6rem + 2vw, 3.25rem)", "name": "Extra grande" },
+				{ "slug": "xx-large", "size": "clamp(2.75rem, 2rem + 3.75vw, 4.75rem)", "name": "Titular" }
 			],
 			"fontFamilies": [
 				{
-					"slug": "system",
-					"name": "System",
-					"fontFamily": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+					"slug": "display",
+					"name": "Fraunces",
+					"fontFamily": "\"Fraunces\", \"Iowan Old Style\", Georgia, serif"
+				},
+				{
+					"slug": "body",
+					"name": "Work Sans",
+					"fontFamily": "\"Work Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
 				}
 			]
 		},
@@ -41,13 +51,21 @@
 	"styles": {
 		"color": {
 			"background": "var(--wp--preset--color--base)",
-			"text": "var(--wp--preset--color--contrast)"
+			"text": "var(--wp--preset--color--ink)"
 		},
 		"typography": {
-			"fontFamily": "var(--wp--preset--font-family--system)",
-			"fontSize": "var(--wp--preset--font-size--medium)"
+			"fontFamily": "var(--wp--preset--font-family--body)",
+			"fontSize": "var(--wp--preset--font-size--medium)",
+			"lineHeight": "1.6"
 		},
 		"elements": {
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--display)",
+					"fontWeight": "600",
+					"lineHeight": "1.15"
+				}
+			},
 			"link": {
 				"color": {
 					"text": "var(--wp--preset--color--primary)"
@@ -55,11 +73,22 @@
 			},
 			"button": {
 				"color": {
-					"background": "var(--wp--preset--color--primary)",
+					"background": "var(--wp--preset--color--accent)",
 					"text": "var(--wp--preset--color--base)"
 				},
+				"typography": {
+					"fontWeight": "600"
+				},
 				"border": {
-					"radius": "6px"
+					"radius": "999px"
+				},
+				"spacing": {
+					"padding": {
+						"top": "0.9rem",
+						"bottom": "0.9rem",
+						"left": "1.75rem",
+						"right": "1.75rem"
+					}
 				}
 			}
 		}

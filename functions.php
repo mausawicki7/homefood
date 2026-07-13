@@ -13,3 +13,39 @@ add_action( 'after_setup_theme', function () {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'editor-styles' );
 } );
+
+add_action( 'wp_enqueue_scripts', function () {
+	wp_enqueue_style(
+		'homefood-fonts',
+		'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap',
+		[],
+		null
+	);
+
+	wp_enqueue_style(
+		'homefood-style',
+		get_template_directory_uri() . '/assets/css/style.css',
+		[ 'homefood-fonts' ],
+		filemtime( get_template_directory() . '/assets/css/style.css' )
+	);
+
+	// La ruta del logo debe resolverse por PHP (get_template_directory_uri) para ser
+	// portable entre el staging (subcarpeta /homefood/) y producción (dominio raíz).
+	// Los templates HTML de FSE no ejecutan PHP, así que se inyecta como custom property.
+	$logo_url = esc_url( get_template_directory_uri() . '/assets/images/logo.png' );
+	wp_add_inline_style( 'homefood-style', ":root{--hf-logo-url:url('{$logo_url}');}" );
+
+	wp_enqueue_script(
+		'homefood-order-progress',
+		get_template_directory_uri() . '/assets/js/order-progress.js',
+		[],
+		filemtime( get_template_directory() . '/assets/js/order-progress.js' ),
+		true
+	);
+
+	wp_localize_script( 'homefood-order-progress', 'homefoodOrderRules', [
+		'minimumTotal' => 70000,
+		'minimumUnits' => 7,
+		'storeApiCartUrl' => esc_url_raw( home_url( '/wp-json/wc/store/v1/cart' ) ),
+	] );
+} );

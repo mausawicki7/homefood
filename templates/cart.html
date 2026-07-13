@@ -1,15 +1,24 @@
 <!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
 
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group">
+<!-- wp:group {"tagName":"main","className":"hf-container hf-section--tight","layout":{"type":"constrained"}} -->
+<main class="wp-block-group hf-container hf-section--tight">
 
-	<!-- wp:heading {"level":1} -->
+	<!-- wp:heading {"level":1,"fontFamily":"display"} -->
 	<h1 class="wp-block-heading">Tu carrito</h1>
 	<!-- /wp:heading -->
 
-	<!-- wp:paragraph {"fontSize":"small"} -->
-	<p class="has-small-font-size">Mínimo 7 viandas por pedido. El total debe alcanzar $70.000 para poder finalizar la compra.</p>
-	<!-- /wp:paragraph -->
+	<!-- wp:html -->
+	<div class="hf-order-progress" data-hf-progress-wrap>
+		<div class="hf-order-progress__row">
+			<span>Progreso hacia el mínimo</span>
+			<span>$70.000</span>
+		</div>
+		<div class="hf-order-progress__track">
+			<div class="hf-order-progress__fill" data-hf-progress-fill></div>
+		</div>
+		<p class="hf-order-progress__msg" data-hf-progress-msg>Armá tu pedido con al menos 7 viandas.</p>
+	</div>
+	<!-- /wp:html -->
 
 	<!-- wp:woocommerce/cart -->
 	<div class="wp-block-woocommerce-cart">
@@ -32,7 +41,7 @@
 		<!-- wp:woocommerce/empty-cart-block -->
 		<div class="wp-block-woocommerce-empty-cart-block">
 			<!-- wp:paragraph {"align":"center"} -->
-			<p class="has-text-align-center">Tu carrito está vacío.</p>
+			<p class="has-text-align-center">Tu carrito está vacío. <a href="/viandas/">Ver el catálogo</a></p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:woocommerce/empty-cart-block -->
