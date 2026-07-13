@@ -1,0 +1,38 @@
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+
+	<!-- wp:woocommerce/store-notices /-->
+
+	<!-- wp:woocommerce/breadcrumbs /-->
+
+	<!-- wp:group {"layout":{"type":"grid","columnCount":2}} -->
+	<div class="wp-block-group">
+
+		<!-- wp:woocommerce/product-image-gallery /-->
+
+		<!-- wp:group {"layout":{"type":"constrained"}} -->
+		<div class="wp-block-group">
+			<!-- wp:post-title {"level":1} /-->
+			<!-- wp:woocommerce/product-price /-->
+			<!-- wp:post-excerpt /-->
+			<!-- wp:woocommerce/add-to-cart-form /-->
+			<!-- wp:woocommerce/product-meta /-->
+		</div>
+		<!-- /wp:group -->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:woocommerce/product-details {"hideTabTitle":false} /-->
+
+	<!-- wp:heading -->
+	<h2 class="wp-block-heading">También te puede interesar</h2>
+	<!-- /wp:heading -->
+	<!-- wp:woocommerce/related-products /-->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->

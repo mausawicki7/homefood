@@ -1,0 +1,45 @@
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+
+	<!-- wp:heading {"level":1} -->
+	<h1 class="wp-block-heading">Tu carrito</h1>
+	<!-- /wp:heading -->
+
+	<!-- wp:paragraph {"fontSize":"small"} -->
+	<p class="has-small-font-size">Mínimo 7 viandas por pedido. El total debe alcanzar $70.000 para poder finalizar la compra.</p>
+	<!-- /wp:paragraph -->
+
+	<!-- wp:woocommerce/cart -->
+	<div class="wp-block-woocommerce-cart">
+		<!-- wp:woocommerce/filled-cart-block -->
+		<div class="wp-block-woocommerce-filled-cart-block">
+			<!-- wp:woocommerce/cart-items-block -->
+			<div class="wp-block-woocommerce-cart-items-block">
+				<!-- wp:woocommerce/cart-line-items-block /-->
+			</div>
+			<!-- /wp:woocommerce/cart-items-block -->
+			<!-- wp:woocommerce/cart-totals-block -->
+			<div class="wp-block-woocommerce-cart-totals-block">
+				<!-- wp:woocommerce/cart-order-summary-block /-->
+				<!-- wp:woocommerce/cart-express-payment-block /-->
+				<!-- wp:woocommerce/proceed-to-checkout-block /-->
+			</div>
+			<!-- /wp:woocommerce/cart-totals-block -->
+		</div>
+		<!-- /wp:woocommerce/filled-cart-block -->
+		<!-- wp:woocommerce/empty-cart-block -->
+		<div class="wp-block-woocommerce-empty-cart-block">
+			<!-- wp:paragraph {"align":"center"} -->
+			<p class="has-text-align-center">Tu carrito está vacío.</p>
+			<!-- /wp:paragraph -->
+		</div>
+		<!-- /wp:woocommerce/empty-cart-block -->
+	</div>
+	<!-- /wp:woocommerce/cart -->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->

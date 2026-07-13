@@ -1,0 +1,34 @@
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+
+	<!-- wp:heading {"level":1} -->
+	<h1 class="wp-block-heading">Finalizar compra</h1>
+	<!-- /wp:heading -->
+
+	<!-- wp:woocommerce/checkout -->
+	<div class="wp-block-woocommerce-checkout">
+		<!-- wp:woocommerce/checkout-fields-block -->
+		<div class="wp-block-woocommerce-checkout-fields-block">
+			<!-- wp:woocommerce/checkout-express-payment-block /-->
+			<!-- wp:woocommerce/checkout-contact-information-block /-->
+			<!-- wp:woocommerce/checkout-shipping-address-block /-->
+			<!-- wp:woocommerce/checkout-shipping-methods-block /-->
+			<!-- wp:woocommerce/checkout-payment-block /-->
+			<!-- wp:woocommerce/checkout-order-note-block /-->
+			<!-- wp:woocommerce/checkout-actions-block /-->
+		</div>
+		<!-- /wp:woocommerce/checkout-fields-block -->
+		<!-- wp:woocommerce/checkout-totals-block -->
+		<div class="wp-block-woocommerce-checkout-totals-block">
+			<!-- wp:woocommerce/checkout-order-summary-block /-->
+		</div>
+		<!-- /wp:woocommerce/checkout-totals-block -->
+	</div>
+	<!-- /wp:woocommerce/checkout -->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->
