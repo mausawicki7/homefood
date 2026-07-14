@@ -115,6 +115,36 @@ add_action( 'wp_enqueue_scripts', function () {
 } );
 
 /**
+ * El bloque de Gutenberg "woocommerce/related-products" (Product Collection con
+ * preset "related") no está devolviendo productos reales en este sitio — muestra
+ * contenido genérico de WordPress en vez de la lista de relacionados. En lugar de
+ * seguir ajustando su configuración interna (ya causó problemas similares en
+ * product-collection, ver commits anteriores), se reemplaza directo por la función
+ * nativa de WooCommerce que arma "relacionados" — el mismo motor que usa el sistema
+ * clásico, sin la capa experimental de bloques de por medio. Se resuelve vía el
+ * mismo mecanismo de tokens que [[icon:...]]: el token se reemplaza en el render
+ * final del bloque wp:html que lo contiene.
+ */
+function homefood_related_products_html() {
+	if ( ! function_exists( 'wc_get_template' ) || ! is_product() ) {
+		return '';
+	}
+	ob_start();
+	woocommerce_related_products( [
+		'posts_per_page' => 4,
+		'columns'        => 4,
+	] );
+	return ob_get_clean();
+}
+
+add_filter( 'render_block', function ( $block_content ) {
+	if ( is_admin() || empty( $block_content ) || strpos( $block_content, '[[related-products]]' ) === false ) {
+		return $block_content;
+	}
+	return str_replace( '[[related-products]]', homefood_related_products_html(), $block_content );
+}, 10, 1 );
+
+/**
  * Los templates HTML de FSE (templates/*.html, parts/*.html) no ejecutan PHP, así que
  * cualquier href="/algo" quedaría hardcodeado a la raíz del dominio — rompe en el staging
  * (instalado en /homefood/) y en cualquier futuro subdirectorio. Se reescriben acá, en el
