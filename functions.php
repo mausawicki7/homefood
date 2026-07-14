@@ -91,6 +91,17 @@ add_action( 'wp_enqueue_scripts', function () {
 			true
 		);
 	}
+
+	// Stepper +/- nativo del tema para inputs de cantidad — reemplaza al plugin
+	// "Quantity Plus Minus Button for WooCommerce" en ficha de producto, carrito
+	// y grillas de listado.
+	wp_enqueue_script(
+		'homefood-quantity-stepper',
+		get_template_directory_uri() . '/assets/js/quantity-stepper.js',
+		[],
+		filemtime( get_template_directory() . '/assets/js/quantity-stepper.js' ),
+		true
+	);
 } );
 
 /**

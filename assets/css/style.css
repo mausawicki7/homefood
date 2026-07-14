@@ -1080,16 +1080,46 @@ ul.products li.product .star-rating { display: none; }
 	margin: 0;
 }
 .hf-product-cta .qty {
-	width: 4.5rem;
+	width: 3.2rem;
 	height: 52px;
-	border: 1px solid rgba(29,29,27,0.14);
-	border-radius: 999px;
+	border: none;
 	text-align: center;
 	font-size: 1rem;
 	font-weight: 600;
-	background: #fff;
+	background: transparent;
 	color: var(--wp--preset--color--ink);
+	-moz-appearance: textfield;
 }
+.hf-product-cta .qty::-webkit-inner-spin-button,
+.hf-product-cta .qty::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Stepper +/- nativo (reemplaza al plugin Quantity Plus Minus Button) */
+.hf-qty-stepper {
+	display: inline-flex;
+	align-items: center;
+	height: 52px;
+	border: 1px solid rgba(29,29,27,0.14);
+	border-radius: 999px;
+	background: #fff;
+	overflow: hidden;
+}
+.hf-qty-stepper__btn {
+	width: 44px;
+	height: 100%;
+	border: none;
+	background: transparent;
+	color: var(--wp--preset--color--primary-dark);
+	font-size: 1.2rem;
+	font-weight: 600;
+	line-height: 1;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.15s var(--hf-ease);
+}
+.hf-qty-stepper__btn:hover { background: var(--wp--preset--color--accent-soft); }
+.hf-qty-stepper__btn:active { background: var(--wp--preset--color--accent-soft); transform: scale(0.95); }
 .hf-product-cta .single_add_to_cart_button,
 .hf-product-cta button[type="submit"] {
 	flex: 1;
