@@ -1163,22 +1163,26 @@ ul.products li.product .star-rating { display: none; }
 
 /* ==========================================================================
    Botón flotante de WhatsApp
-   Mismo lenguaje visual que el burbuja flotante del carrito (Cart for
-   WooCommerce): círculo, sombra, hover con leve elevación. Se posiciona
-   un nivel arriba en la pila (bottom offset mayor) para no superponerse.
-   Si el plugin de carrito cambia de tamaño/posición, ajustar --hf-fab-offset.
+   Calculado contra el CSS real de #fkcart-floating-toggler (plugin Cart for
+   WooCommerce / FunnelKit): bottom:36px, right:36px, tamaño =
+   calc(var(--fkcart-toggle-size) * 2 * 1px). Sin navegador conectado para
+   medir --fkcart-toggle-size en vivo, se asume el default del plugin (~30,
+   es decir 60px de botón). Si el cliente lo configuró distinto, ajustar
+   --hf-fab-offset abajo para que no se superponga ni quede muy separado.
    ========================================================================== */
 
 :root {
-	--hf-fab-size: 58px;
-	--hf-fab-offset: 92px; /* distancia desde abajo: por encima del bubble del carrito */
+	--hf-fab-size: 56px;
+	--hf-fab-side: 36px;             /* mismo right que el toggler del carrito */
+	--hf-cart-toggler-size: 60px;    /* asume --fkcart-toggle-size ≈ 30 (default del plugin) */
+	--hf-fab-offset: calc(36px + var(--hf-cart-toggler-size) + 16px); /* bottom del carrito + su alto + separación */
 }
 
 .hf-whatsapp-fab {
 	position: fixed;
-	right: 20px;
+	right: var(--hf-fab-side);
 	bottom: var(--hf-fab-offset);
-	z-index: 70;
+	z-index: 10998; /* justo debajo del toggler del carrito (10999), por si llegan a superponerse en el resize */
 	width: var(--hf-fab-size);
 	height: var(--hf-fab-size);
 	border-radius: 50%;
@@ -1191,14 +1195,15 @@ ul.products li.product .star-rating { display: none; }
 	transition: transform 0.2s var(--hf-ease), box-shadow 0.2s var(--hf-ease);
 }
 .hf-whatsapp-fab:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 28px 52px rgba(19,68,50,0.22); color: #fff; }
-.hf-whatsapp-fab svg { width: 28px; height: 28px; }
+.hf-whatsapp-fab svg { width: 27px; height: 27px; }
 
 @media (max-width: 640px) {
 	:root {
-		--hf-fab-size: 52px;
-		--hf-fab-offset: 82px;
+		--hf-fab-size: 50px;
+		--hf-fab-side: 20px;
+		--hf-cart-toggler-size: 54px;
+		--hf-fab-offset: calc(20px + var(--hf-cart-toggler-size) + 14px);
 	}
-	.hf-whatsapp-fab { right: 16px; }
 	body.hf-product-page-body .hf-whatsapp-fab { bottom: calc(var(--hf-fab-offset) + 76px); }
 }
 
