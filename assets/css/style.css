@@ -539,6 +539,7 @@ body.hf-no-scroll { overflow: hidden; }
    ========================================================================== */
 
 .wp-block-woocommerce-product-collection ul.wc-block-product-template,
+.wc-block-product-template,
 .wc-block-grid__products {
 	display: grid !important;
 	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
@@ -549,7 +550,7 @@ body.hf-no-scroll { overflow: hidden; }
 	margin: 0;
 }
 
-.wc-block-product-template li.wc-block-product,
+.wc-block-product,
 .wc-block-grid__product {
 	background: #fff;
 	border-radius: var(--hf-radius-md);
@@ -558,8 +559,13 @@ body.hf-no-scroll { overflow: hidden; }
 	border: 1px solid rgba(29,29,27,0.06);
 	transition: transform 0.25s var(--hf-ease), box-shadow 0.25s var(--hf-ease);
 	padding-bottom: 1.1rem;
+	/* Respaldo por si el selector del contenedor de arriba no matchea la
+	   marca exacta de esta versión de WooCommerce Blocks: fuerza que este
+	   ítem no se estire aunque el padre siga en align-items:stretch. */
+	align-self: start !important;
+	height: auto !important;
 }
-.wc-block-product-template li.wc-block-product:hover,
+.wc-block-product:hover,
 .wc-block-grid__product:hover {
 	transform: translateY(-6px);
 	box-shadow: var(--hf-shadow-md);
@@ -569,6 +575,7 @@ body.hf-no-scroll { overflow: hidden; }
 	aspect-ratio: 4/3;
 	object-fit: cover;
 	border-radius: 0;
+	height: auto !important;
 }
 
 /* Grid clásico de WooCommerce (Legacy Blocks / shortcodes: product-best-sellers, etc.) */
@@ -1152,6 +1159,47 @@ ul.products li.product .star-rating { display: none; }
 @media (max-width: 899px) {
 	.hf-sticky-cta { display: flex; }
 	body.hf-product-page-body { padding-bottom: 76px; }
+}
+
+/* ==========================================================================
+   Botón flotante de WhatsApp
+   Mismo lenguaje visual que el burbuja flotante del carrito (Cart for
+   WooCommerce): círculo, sombra, hover con leve elevación. Se posiciona
+   un nivel arriba en la pila (bottom offset mayor) para no superponerse.
+   Si el plugin de carrito cambia de tamaño/posición, ajustar --hf-fab-offset.
+   ========================================================================== */
+
+:root {
+	--hf-fab-size: 58px;
+	--hf-fab-offset: 92px; /* distancia desde abajo: por encima del bubble del carrito */
+}
+
+.hf-whatsapp-fab {
+	position: fixed;
+	right: 20px;
+	bottom: var(--hf-fab-offset);
+	z-index: 70;
+	width: var(--hf-fab-size);
+	height: var(--hf-fab-size);
+	border-radius: 50%;
+	background: #25D366;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: var(--hf-shadow-lg);
+	transition: transform 0.2s var(--hf-ease), box-shadow 0.2s var(--hf-ease);
+}
+.hf-whatsapp-fab:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 28px 52px rgba(19,68,50,0.22); color: #fff; }
+.hf-whatsapp-fab svg { width: 28px; height: 28px; }
+
+@media (max-width: 640px) {
+	:root {
+		--hf-fab-size: 52px;
+		--hf-fab-offset: 82px;
+	}
+	.hf-whatsapp-fab { right: 16px; }
+	body.hf-product-page-body .hf-whatsapp-fab { bottom: calc(var(--hf-fab-offset) + 76px); }
 }
 
 /* ==========================================================================
