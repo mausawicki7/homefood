@@ -57,6 +57,9 @@ summary:focus-visible,
 	margin-inline: auto;
 	padding-inline: 1.5rem;
 }
+@media (max-width: 420px) {
+	.hf-container { padding-inline: 1rem; }
+}
 
 .hf-section { padding-block: clamp(2.5rem, 4vw, 5rem); }
 .hf-section--tight { padding-block: clamp(1.5rem, 2.5vw, 3rem); }
@@ -182,7 +185,12 @@ summary:focus-visible,
 }
 .hf-header__nav a:hover::after { transform: scaleX(1); transform-origin: left; }
 
-.hf-header__actions { display: flex; align-items: center; gap: 1rem; }
+.hf-header__actions { display: flex; align-items: center; gap: 0.75rem; }
+@media (max-width: 420px) {
+	.hf-header__actions { gap: 0.5rem; }
+	/* Con logo + carrito + hamburguesa ya no entra cómodo el indicador de progreso */
+	.hf-progress-mini { display: none !important; }
+}
 
 .hf-cart-link {
 	position: relative;
@@ -431,7 +439,7 @@ body.hf-no-scroll { overflow: hidden; }
 
 @media (max-width: 900px) {
 	.hf-hero__grid { grid-template-columns: 1fr; }
-	.hf-hero__media { aspect-ratio: 16 / 10; transform: none; order: -1; }
+	.hf-hero__media { aspect-ratio: 16 / 10; transform: none; margin-top: 1.75rem; }
 }
 
 /* ==========================================================================
@@ -466,6 +474,11 @@ body.hf-no-scroll { overflow: hidden; }
 	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 	gap: 1rem;
 }
+@media (max-width: 640px) {
+	/* auto-fit estira el último ítem impar a todo el ancho; con 7 categorías
+	   se ve roto. Un grid fijo de 2 columnas es predecible en cualquier cantidad. */
+	.hf-cats { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+}
 .hf-cat-card {
 	display: flex;
 	flex-direction: column;
@@ -492,6 +505,36 @@ body.hf-no-scroll { overflow: hidden; }
 .hf-cat-card__name { font-weight: 600; font-size: 0.98rem; }
 
 /* ==========================================================================
+   Pills de categoría (archivo de productos)
+   ========================================================================== */
+
+.hf-cat-pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin: 1.25rem 0 2rem;
+}
+.hf-cat-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.55rem 1.1rem;
+	border-radius: 999px;
+	border: 1px solid rgba(29,29,27,0.14);
+	background: #fff;
+	color: var(--wp--preset--color--ink);
+	text-decoration: none;
+	font-size: 0.88rem;
+	font-weight: 600;
+	transition: background 0.2s var(--hf-ease), color 0.2s var(--hf-ease), border-color 0.2s var(--hf-ease);
+}
+.hf-cat-pill:hover { border-color: var(--wp--preset--color--accent); color: var(--wp--preset--color--primary-dark); }
+.hf-cat-pill.is-active {
+	background: var(--wp--preset--color--primary);
+	border-color: var(--wp--preset--color--primary);
+	color: #fff;
+}
+
+/* ==========================================================================
    Grillas de producto (funciona sobre bloques WooCommerce nativos)
    ========================================================================== */
 
@@ -499,6 +542,7 @@ body.hf-no-scroll { overflow: hidden; }
 .wc-block-grid__products {
 	display: grid !important;
 	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+	align-items: start !important;
 	gap: 1.75rem !important;
 	list-style: none;
 	padding: 0;
@@ -531,6 +575,7 @@ body.hf-no-scroll { overflow: hidden; }
 ul.products {
 	display: grid !important;
 	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+	align-items: start !important;
 	gap: 1.75rem !important;
 	list-style: none;
 	padding: 0;
@@ -848,6 +893,10 @@ ul.products li.product .star-rating { display: none; }
 	border-radius: var(--hf-radius-lg);
 	padding: clamp(1.75rem, 4vw, 3rem);
 }
+@media (max-width: 640px) {
+	.hf-cta-whatsapp { flex-direction: column; align-items: stretch; text-align: center; }
+	.hf-cta-whatsapp .hf-btn { width: 100%; }
+}
 .hf-cta-whatsapp h2 { color: #fff; margin: 0 0 0.4rem; }
 .hf-cta-whatsapp p { color: rgba(255,255,255,0.75); margin: 0; }
 
@@ -933,6 +982,176 @@ ul.products li.product .star-rating { display: none; }
 }
 @media (max-width: 560px) {
 	.hf-footer__grid { grid-template-columns: 1fr; }
+}
+
+/* ==========================================================================
+   Ficha de producto
+   ========================================================================== */
+
+.hf-product-crumbs {
+	font-size: 0.85rem;
+	color: var(--wp--preset--color--muted);
+	margin-top: 1.5rem;
+}
+.hf-product-crumbs .woocommerce-breadcrumb { margin: 0; }
+.hf-product-crumbs a { color: var(--wp--preset--color--muted); text-decoration: none; }
+.hf-product-crumbs a:hover { color: var(--wp--preset--color--primary); }
+
+/* Mobile-first: imagen arriba, info abajo. Grid de 2 columnas recién en desktop. */
+.hf-product-layout {
+	display: flex;
+	flex-direction: column;
+	gap: 1.75rem;
+	margin-top: 1.25rem;
+}
+.hf-product-gallery img {
+	border-radius: var(--hf-radius-lg);
+	aspect-ratio: 4/3;
+	object-fit: cover;
+	width: 100%;
+}
+.hf-product-gallery .woocommerce-product-gallery { border-radius: var(--hf-radius-lg); overflow: hidden; }
+
+.hf-product-title {
+	font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.4rem);
+	margin: 0 0 0.5rem;
+	line-height: 1.1;
+}
+
+.hf-product-price {
+	font-size: 1.6rem !important;
+	font-weight: 700;
+	color: var(--wp--preset--color--primary-dark) !important;
+	margin-bottom: 1rem;
+}
+.hf-product-price .woocommerce-Price-amount { font-family: var(--wp--preset--font-family--display); }
+
+.hf-product-excerpt {
+	color: var(--wp--preset--color--muted);
+	font-size: 1.02rem;
+	line-height: 1.65;
+	margin-bottom: 1.25rem;
+}
+.hf-product-excerpt p { margin: 0; }
+
+.hf-product-trust {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin-bottom: 1.5rem;
+}
+
+/* Formulario de compra: quantity stepper + botón, alineados y prolijos */
+.hf-product-cta {
+	background: var(--wp--preset--color--cream);
+	border-radius: var(--hf-radius-md);
+	padding: 1.25rem;
+	margin-bottom: 1rem;
+}
+.hf-product-cta form.cart {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem;
+}
+.hf-product-cta .quantity {
+	display: flex;
+	margin: 0;
+}
+.hf-product-cta .qty {
+	width: 4.5rem;
+	height: 52px;
+	border: 1px solid rgba(29,29,27,0.14);
+	border-radius: 999px;
+	text-align: center;
+	font-size: 1rem;
+	font-weight: 600;
+	background: #fff;
+	color: var(--wp--preset--color--ink);
+}
+.hf-product-cta .single_add_to_cart_button,
+.hf-product-cta button[type="submit"] {
+	flex: 1;
+	min-width: 200px;
+	height: 52px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--wp--preset--color--accent) !important;
+	color: #fff !important;
+	border: none !important;
+	border-radius: 999px !important;
+	font-weight: 600;
+	font-size: 1rem;
+	padding: 0 1.75rem !important;
+	cursor: pointer;
+	transition: background 0.2s var(--hf-ease), transform 0.2s var(--hf-ease);
+}
+.hf-product-cta .single_add_to_cart_button:hover,
+.hf-product-cta button[type="submit"]:hover {
+	background: #479236 !important;
+	transform: translateY(-1px);
+}
+
+.hf-product-minimum {
+	font-size: 0.85rem;
+	color: var(--wp--preset--color--muted);
+	background: var(--wp--preset--color--accent-soft);
+	border-radius: var(--hf-radius-sm);
+	padding: 0.75rem 1rem;
+	margin: 0 0 1.5rem;
+}
+
+.hf-product-meta {
+	font-size: 0.85rem;
+	color: var(--wp--preset--color--muted);
+	padding-top: 1rem;
+	border-top: 1px solid rgba(29,29,27,0.08);
+}
+.hf-product-meta a { color: var(--wp--preset--color--primary); }
+
+.hf-product-details { margin-top: 2.5rem; }
+
+.hf-related-heading {
+	font-family: var(--wp--preset--font-family--display);
+	margin: 3rem 0 1.25rem;
+}
+
+@media (min-width: 900px) {
+	.hf-product-layout {
+		flex-direction: row;
+		align-items: flex-start;
+		gap: 3rem;
+	}
+	.hf-product-gallery, .hf-product-info { flex: 1 1 0; min-width: 0; }
+	.hf-product-gallery { position: sticky; top: calc(var(--hf-header-h, 88px) + 1.5rem); }
+}
+
+/* Barra sticky de compra (mobile): visible solo cuando el CTA real sale de vista */
+.hf-sticky-cta {
+	display: none;
+	position: fixed;
+	left: 0; right: 0; bottom: 0;
+	z-index: 80;
+	background: #fff;
+	box-shadow: 0 -8px 24px rgba(19,68,50,0.14);
+	padding: 0.85rem 1.25rem;
+	padding-bottom: calc(0.85rem + env(safe-area-inset-bottom));
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	transform: translateY(100%);
+	transition: transform 0.25s var(--hf-ease);
+}
+.hf-sticky-cta.is-visible { transform: translateY(0); }
+.hf-sticky-cta__info { display: flex; flex-direction: column; line-height: 1.2; }
+.hf-sticky-cta__label { font-size: 0.72rem; color: var(--wp--preset--color--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.hf-sticky-cta__price { font-family: var(--wp--preset--font-family--display); font-size: 1.15rem; color: var(--wp--preset--color--primary-dark); }
+.hf-sticky-cta .hf-btn { padding: 0.8rem 1.5rem; }
+
+@media (max-width: 899px) {
+	.hf-sticky-cta { display: flex; }
+	body.hf-product-page-body { padding-bottom: 76px; }
 }
 
 /* ==========================================================================

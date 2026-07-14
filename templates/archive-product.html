@@ -7,18 +7,23 @@
 
 	<!-- wp:group {"layout":{"type":"flex","justifyContent":"space-between"}} -->
 	<div class="wp-block-group">
-		<!-- wp:query-title {"type":"archive","fontFamily":"display"} /-->
+		<!-- wp:query-title {"type":"archive","showPrefix":false,"fontFamily":"display"} /-->
 		<!-- wp:woocommerce/catalog-sorting /-->
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"layout":{"type":"flex"}} -->
-	<div class="wp-block-group">
-		<!-- wp:woocommerce/product-filter-active {"style":{}} /-->
-		<!-- wp:woocommerce/product-filter-price /-->
-		<!-- wp:woocommerce/product-filter-attribute {"attributeId":0} /-->
+	<!-- wp:html -->
+	<div class="hf-cat-pills" data-hf-cat-pills>
+		<a class="hf-cat-pill" href="/viandas/" data-cat="">Todas</a>
+		<a class="hf-cat-pill" href="/viandas/?product_cat=clasicos" data-cat="clasicos">Clásicas</a>
+		<a class="hf-cat-pill" href="/viandas/?product_cat=combos" data-cat="combos">Combos</a>
+		<a class="hf-cat-pill" href="/viandas/?product_cat=fitness" data-cat="fitness">Fitness</a>
+		<a class="hf-cat-pill" href="/viandas/?product_cat=keto" data-cat="keto">Keto</a>
+		<a class="hf-cat-pill" href="/viandas/?product_cat=ensaladas-y-omelettes" data-cat="ensaladas-y-omelettes">Ensaladas y omelettes</a>
+		<a class="hf-cat-pill" href="/viandas/?product_cat=emp-pizza" data-cat="emp-pizza">Tartas, empanadas, pizzas</a>
+		<a class="hf-cat-pill" href="/viandas/?product_cat=vegetariano" data-cat="vegetariano">Vegetariano</a>
 	</div>
-	<!-- /wp:group -->
+	<!-- /wp:html -->
 
 	<!-- wp:woocommerce/product-collection {"query":{"perPage":12,"inherit":true},"displayLayout":{"type":"flex","columns":4}} -->
 	<div class="wp-block-woocommerce-product-collection">

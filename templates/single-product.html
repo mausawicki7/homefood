@@ -1,38 +1,84 @@
 <!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
 
-<!-- wp:group {"tagName":"main","className":"hf-container hf-section--tight","layout":{"type":"constrained"}} -->
-<main class="wp-block-group hf-container hf-section--tight">
+<!-- wp:group {"tagName":"main","className":"hf-container hf-section--tight hf-product-page","layout":{"type":"constrained"}} -->
+<main class="wp-block-group hf-container hf-section--tight hf-product-page">
 
 	<!-- wp:woocommerce/store-notices /-->
 
+	<!-- wp:html -->
+	<div class="hf-product-crumbs">
+	<!-- /wp:html -->
 	<!-- wp:woocommerce/breadcrumbs /-->
+	<!-- wp:html -->
+	</div>
+	<!-- /wp:html -->
 
-	<!-- wp:group {"layout":{"type":"grid","columnCount":2}} -->
-	<div class="wp-block-group">
+	<!-- wp:group {"className":"hf-product-layout","layout":{"type":"default"}} -->
+	<div class="wp-block-group hf-product-layout">
 
-		<!-- wp:woocommerce/product-image-gallery /-->
+		<!-- wp:group {"className":"hf-product-gallery","layout":{"type":"default"}} -->
+		<div class="wp-block-group hf-product-gallery">
+			<!-- wp:woocommerce/product-image-gallery /-->
+		</div>
+		<!-- /wp:group -->
 
-		<!-- wp:group {"layout":{"type":"constrained"}} -->
-		<div class="wp-block-group">
-			<!-- wp:post-title {"level":1,"fontFamily":"display"} /-->
-			<!-- wp:woocommerce/product-price /-->
-			<!-- wp:post-excerpt /-->
-			<!-- wp:woocommerce/add-to-cart-form /-->
-			<!-- wp:woocommerce/product-meta /-->
+		<!-- wp:group {"className":"hf-product-info","layout":{"type":"constrained"}} -->
+		<div class="wp-block-group hf-product-info">
+			<!-- wp:post-title {"level":1,"fontFamily":"display","className":"hf-product-title"} /-->
+
+			<!-- wp:woocommerce/product-price {"className":"hf-product-price"} /-->
+
+			<!-- wp:post-excerpt {"className":"hf-product-excerpt"} /-->
+
+			<!-- wp:html -->
+			<div class="hf-product-trust">
+				<span class="hf-badge">[[icon:clock]] Lo recibís en 48 hs</span>
+				<span class="hf-badge">[[icon:salad]] Ingredientes reales</span>
+				<span class="hf-badge">[[icon:package]] Hasta 3 días en heladera</span>
+			</div>
+			<!-- /wp:html -->
+
+			<!-- wp:group {"className":"hf-product-cta","layout":{"type":"default"}} -->
+			<div class="wp-block-group hf-product-cta">
+				<!-- wp:woocommerce/add-to-cart-form /-->
+			</div>
+			<!-- /wp:group -->
+
+			<!-- wp:html -->
+			<p class="hf-product-minimum">Recordá: el pedido mínimo es de $70.000 (aprox. 7 viandas). Podés combinar esta vianda con otras categorías para llegar al mínimo.</p>
+			<!-- /wp:html -->
+
+			<!-- wp:woocommerce/product-meta {"className":"hf-product-meta"} /-->
 		</div>
 		<!-- /wp:group -->
 
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:woocommerce/product-details {"hideTabTitle":false} /-->
+	<!-- wp:group {"className":"hf-product-details","layout":{"type":"constrained"}} -->
+	<div class="wp-block-group hf-product-details">
+		<!-- wp:woocommerce/product-details {"hideTabTitle":false} /-->
+	</div>
+	<!-- /wp:group -->
 
-	<!-- wp:heading {"fontFamily":"display"} -->
-	<h2 class="wp-block-heading">También te puede interesar</h2>
-	<!-- /wp:heading -->
-	<!-- wp:woocommerce/related-products /-->
+	<!-- wp:html -->
+	<div class="hf-container hf-section--tight">
+		<h2 class="hf-related-heading">También te puede interesar</h2>
+	</div>
+	<!-- /wp:html -->
+	<!-- wp:woocommerce/related-products {"className":"hf-container"} /-->
 
 </main>
 <!-- /wp:group -->
+
+<!-- wp:html -->
+<div class="hf-sticky-cta" data-hf-sticky-cta>
+	<div class="hf-sticky-cta__info">
+		<span class="hf-sticky-cta__label">Total</span>
+		<span class="hf-sticky-cta__price" data-hf-sticky-price>—</span>
+	</div>
+	<button type="button" class="hf-btn hf-btn--accent" data-hf-sticky-add>Agregar al carrito</button>
+</div>
+<!-- /wp:html -->
 
 <!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->

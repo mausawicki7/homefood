@@ -64,6 +64,26 @@ add_action( 'wp_enqueue_scripts', function () {
 		filemtime( get_template_directory() . '/assets/js/mobile-menu.js' ),
 		true
 	);
+
+	if ( function_exists( 'is_product' ) && is_product() ) {
+		wp_enqueue_script(
+			'homefood-product-sticky-cta',
+			get_template_directory_uri() . '/assets/js/product-sticky-cta.js',
+			[],
+			filemtime( get_template_directory() . '/assets/js/product-sticky-cta.js' ),
+			true
+		);
+	}
+
+	if ( function_exists( 'is_shop' ) && ( is_shop() || is_product_category() ) ) {
+		wp_enqueue_script(
+			'homefood-category-pills',
+			get_template_directory_uri() . '/assets/js/category-pills.js',
+			[],
+			filemtime( get_template_directory() . '/assets/js/category-pills.js' ),
+			true
+		);
+	}
 } );
 
 /**
