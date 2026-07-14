@@ -32,6 +32,18 @@ img { max-width: 100%; height: auto; display: block; }
 
 a { transition: color 0.2s var(--hf-ease); }
 
+a, button, summary, [tabindex] {
+	outline-offset: 3px;
+}
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+	outline: 3px solid var(--wp--preset--color--accent);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
 .hf-container {
 	max-width: 1280px;
 	margin-inline: auto;
@@ -782,7 +794,7 @@ ul.products li.product .star-rating { display: none; }
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 40px; height: 40px;
+	width: 44px; height: 44px;
 	border-radius: 50%;
 	border: 1px solid rgba(29,29,27,0.14);
 	background: #fff;
@@ -792,17 +804,26 @@ ul.products li.product .star-rating { display: none; }
 }
 .hf-carousel__arrow svg { width: 18px; height: 18px; }
 .hf-carousel__arrow:hover { background: var(--wp--preset--color--accent-soft); transform: scale(1.06); }
-.hf-carousel__dots { display: flex; align-items: center; gap: 0.5rem; }
+.hf-carousel__dots { display: flex; align-items: center; gap: 0.6rem; }
 .hf-carousel__dot {
-	width: 8px; height: 8px;
-	border-radius: 50%;
+	width: 44px; height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	border: none;
-	background: #d7ddd6;
+	background: transparent;
 	padding: 0;
 	cursor: pointer;
+	position: relative;
+}
+.hf-carousel__dot::before {
+	content: "";
+	width: 8px; height: 8px;
+	border-radius: 50%;
+	background: #d7ddd6;
 	transition: background 0.2s var(--hf-ease), transform 0.2s var(--hf-ease);
 }
-.hf-carousel__dot.is-active { background: var(--wp--preset--color--accent); transform: scale(1.3); }
+.hf-carousel__dot.is-active::before { background: var(--wp--preset--color--accent); transform: scale(1.3); }
 
 /* ==========================================================================
    CTA WhatsApp

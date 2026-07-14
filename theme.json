@@ -12,7 +12,7 @@
 				{ "slug": "base", "color": "#ffffff", "name": "Base" },
 				{ "slug": "cream", "color": "#f7f5ee", "name": "Crema" },
 				{ "slug": "ink", "color": "#1d1d1b", "name": "Tinta" },
-				{ "slug": "muted", "color": "#67768e", "name": "Gris" },
+				{ "slug": "muted", "color": "#57657c", "name": "Gris" },
 				{ "slug": "primary", "color": "#1e6c4f", "name": "Verde Homefood" },
 				{ "slug": "primary-dark", "color": "#134432", "name": "Verde oscuro" },
 				{ "slug": "accent", "color": "#54ac40", "name": "Verde hoja" },
