@@ -538,6 +538,7 @@ body.hf-no-scroll { overflow: hidden; }
    Grillas de producto (funciona sobre bloques WooCommerce nativos)
    ========================================================================== */
 
+.hf-product-grid ul.wc-block-product-template,
 .wp-block-woocommerce-product-collection ul.wc-block-product-template,
 .wc-block-product-template,
 .wc-block-grid__products {
@@ -559,9 +560,17 @@ body.hf-no-scroll { overflow: hidden; }
 	border: 1px solid rgba(29,29,27,0.06);
 	transition: transform 0.25s var(--hf-ease), box-shadow 0.25s var(--hf-ease);
 	padding-bottom: 1.1rem;
-	/* Respaldo por si el selector del contenedor de arriba no matchea la
-	   marca exacta de esta versión de WooCommerce Blocks: fuerza que este
-	   ítem no se estire aunque el padre siga en align-items:stretch. */
+	/* El bloque "Product Collection" con displayLayout:flex le inyecta a cada
+	   <li> un width/flex-basis en % pensado para un contenedor flex — al
+	   forzar el padre a display:grid ese % competía y angostaba la tarjeta
+	   a un ancho mínimo (el título se veía envuelto letra por letra). Se
+	   anula cualquier width/flex-basis heredado y se fuerza a ocupar toda
+	   la celda del grid. */
+	width: 100% !important;
+	max-width: none !important;
+	min-width: 0 !important;
+	flex: none !important;
+	box-sizing: border-box !important;
 	align-self: start !important;
 	height: auto !important;
 }
@@ -569,6 +578,11 @@ body.hf-no-scroll { overflow: hidden; }
 .wc-block-grid__product:hover {
 	transform: translateY(-6px);
 	box-shadow: var(--hf-shadow-md);
+}
+.wc-block-product > *,
+.wc-block-grid__product > * {
+	max-width: none !important;
+	width: auto !important;
 }
 .wc-block-components-product-image img,
 .wc-block-grid__product-image img {
