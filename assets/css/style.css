@@ -138,9 +138,21 @@ main > .hf-section--tight:first-child { padding-top: 1.25rem; }
    Header
    ========================================================================== */
 
-.hf-header {
+/* En FSE, la template-part del header se renderiza envuelta en un
+   <header class="wp-block-template-part"> cuya altura es exactamente la del
+   header. Como un position:sticky solo se desplaza dentro de su padre, poner
+   el sticky en .hf-header (interno) no alcanza: no tiene recorrido y se va con
+   el scroll. El sticky tiene que estar en el WRAPPER externo, que es hijo
+   directo de .wp-site-blocks (tan alto como toda la página). Se apunta solo al
+   wrapper del header (es un <header>), no al del footer (<footer>). */
+.wp-site-blocks > header.wp-block-template-part {
 	position: sticky;
 	top: 0;
+	z-index: 100;
+}
+
+.hf-header {
+	position: relative;
 	z-index: 100;
 	background: rgba(255, 255, 255, 0.94);
 	backdrop-filter: blur(10px);
