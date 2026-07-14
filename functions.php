@@ -48,4 +48,43 @@ add_action( 'wp_enqueue_scripts', function () {
 		'minimumUnits' => 7,
 		'storeApiCartUrl' => esc_url_raw( home_url( '/wp-json/wc/store/v1/cart' ) ),
 	] );
+
+	wp_enqueue_script(
+		'homefood-testimonial-carousel',
+		get_template_directory_uri() . '/assets/js/testimonial-carousel.js',
+		[],
+		filemtime( get_template_directory() . '/assets/js/testimonial-carousel.js' ),
+		true
+	);
+
+	wp_enqueue_script(
+		'homefood-mobile-menu',
+		get_template_directory_uri() . '/assets/js/mobile-menu.js',
+		[],
+		filemtime( get_template_directory() . '/assets/js/mobile-menu.js' ),
+		true
+	);
 } );
+
+/**
+ * Los templates HTML de FSE (templates/*.html, parts/*.html) no ejecutan PHP, así que
+ * cualquier href="/algo" quedaría hardcodeado a la raíz del dominio — rompe en el staging
+ * (instalado en /homefood/) y en cualquier futuro subdirectorio. Se reescriben acá, en el
+ * render final, contra home_url() real — funciona igual en staging y en producción sin
+ * tocar un solo link a mano en el go-live (§8 de CLAUDE.md).
+ */
+add_filter( 'render_block', function ( $block_content, $block ) {
+	if ( is_admin() || empty( $block_content ) || strpos( $block_content, 'href="/' ) === false ) {
+		return $block_content;
+	}
+
+	$home = home_url( '/' );
+
+	return preg_replace_callback(
+		'/href="\/(?!\/)([^"]*)"/',
+		function ( $matches ) use ( $home ) {
+			return 'href="' . esc_url( $home . $matches[1] ) . '"';
+		},
+		$block_content
+	);
+}, 10, 2 );
