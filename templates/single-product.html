@@ -66,7 +66,17 @@
 		<h2 class="hf-related-heading">También te puede interesar</h2>
 	</div>
 	<!-- /wp:html -->
-	<!-- wp:woocommerce/related-products {"className":"hf-container"} /-->
+
+	<!-- wp:woocommerce/related-products {"className":"hf-container hf-product-grid"} -->
+	<div class="wp-block-woocommerce-related-products hf-container hf-product-grid">
+		<!-- wp:woocommerce/product-template -->
+			<!-- wp:woocommerce/product-image /-->
+			<!-- wp:post-title {"isLink":true} /-->
+			<!-- wp:woocommerce/product-price /-->
+			<!-- wp:woocommerce/product-button /-->
+		<!-- /wp:woocommerce/product-template -->
+	</div>
+	<!-- /wp:woocommerce/related-products -->
 
 </main>
 <!-- /wp:group -->
