@@ -23,17 +23,19 @@
 	}
 }
 
-/* Guard global contra scroll horizontal. Se usa overflow-x: clip (no hidden):
-   hidden crearía un contenedor de scroll y rompería el position:sticky del
-   header; clip recorta el desborde sin ese efecto secundario. */
-html, body {
-	max-width: 100%;
-	overflow-x: clip;
+/* Reset de box-sizing global. Sin esto los .hf-* quedaban en content-box y
+   cualquier elemento con width:100% + padding (ej. el CTA de WhatsApp con
+   hasta 3rem de padding) desbordaba el ancho y generaba scroll horizontal.
+   Esta es la causa real del desborde — NO se usa overflow-x:hidden/clip en
+   html/body porque eso rompe el position:sticky del header. */
+*, *::before, *::after {
+	box-sizing: border-box;
 }
 
 body {
 	background: #fff;
 	color: var(--wp--preset--color--ink);
+	max-width: 100%;
 }
 
 img { max-width: 100%; height: auto; display: block; }
@@ -649,13 +651,34 @@ ul.products li.product > a.woocommerce-loop-product__link {
 	text-decoration: none;
 }
 
+/* Wrappers de imagen: el markup del home (wc-block-grid) mete la imagen dentro
+   de un <div class="wc-block-grid__product-image"> y del <a> de la card, ambos
+   con padding/margin propios que dejaban la foto con un marco blanco alrededor.
+   Se los resetea para que la imagen cubra el ancho completo de la card, flush. */
+.wc-block-grid__product-image,
+.wc-block-components-product-image,
+ul.products li.product > a.woocommerce-loop-product__link {
+	display: block;
+	width: 100%;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+.wc-block-grid__product-image picture,
+.wc-block-components-product-image picture,
+ul.products li.product picture {
+	display: block;
+	width: 100%;
+}
+
 .wc-block-components-product-image img,
 .wc-block-grid__product-image img,
 ul.products li.product img {
 	aspect-ratio: 4/3;
 	object-fit: cover;
-	width: 100%;
+	width: 100% !important;
 	height: auto !important;
+	max-width: none !important;
+	display: block;
 	/* La card ya tiene overflow:hidden + radius, pero se fuerza acá también
 	   por si algún wrapper intermedio no queda perfectamente flush al borde. */
 	border-radius: var(--hf-radius-md) var(--hf-radius-md) 0 0 !important;
