@@ -92,6 +92,16 @@ add_action( 'wp_enqueue_scripts', function () {
 		);
 	}
 
+	// Rediseño de las cards de producto: agrega tagline por categoría y arma la
+	// fila de 2 acciones (Añadir + Ver producto) sin romper el add-to-cart AJAX.
+	wp_enqueue_script(
+		'homefood-product-cards',
+		get_template_directory_uri() . '/assets/js/product-cards.js',
+		[],
+		filemtime( get_template_directory() . '/assets/js/product-cards.js' ),
+		true
+	);
+
 	// Stepper +/- nativo del tema para inputs de cantidad — reemplaza al plugin
 	// "Quantity Plus Minus Button for WooCommerce" en ficha de producto, carrito
 	// y grillas de listado.

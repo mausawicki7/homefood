@@ -552,7 +552,8 @@ body.hf-no-scroll { overflow: hidden; }
 }
 
 .wc-block-product,
-.wc-block-grid__product {
+.wc-block-grid__product,
+ul.products li.product {
 	background: #fff;
 	border-radius: var(--hf-radius-md);
 	overflow: hidden;
@@ -575,7 +576,8 @@ body.hf-no-scroll { overflow: hidden; }
 	height: auto !important;
 }
 .wc-block-product:hover,
-.wc-block-grid__product:hover {
+.wc-block-grid__product:hover,
+ul.products li.product:hover {
 	transform: translateY(-6px);
 	box-shadow: var(--hf-shadow-md);
 }
@@ -584,100 +586,134 @@ body.hf-no-scroll { overflow: hidden; }
 	max-width: none !important;
 	width: auto !important;
 }
-.wc-block-components-product-image img,
-.wc-block-grid__product-image img {
-	aspect-ratio: 4/3;
-	object-fit: cover;
-	border-radius: 0;
-	height: auto !important;
+
+/* ==========================================================================
+   Contenido de la card: imagen, título, tagline, precio, acciones.
+   Reglas comunes a los 2 mercados de markup de WooCommerce (Blocks y Legacy).
+   ========================================================================== */
+
+.wc-block-product,
+.wc-block-grid__product,
+ul.products li.product {
+	text-align: left !important;
+	display: flex;
+	flex-direction: column;
 }
 
-/* Grid clásico de WooCommerce (Legacy Blocks / shortcodes: product-best-sellers, etc.) */
-ul.products {
-	display: grid !important;
-	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
-	align-items: start !important;
-	gap: 1.75rem !important;
-	list-style: none;
-	padding: 0;
-	margin: 0 0 2rem !important;
-}
-ul.products li.product {
-	background: #fff;
-	border-radius: var(--hf-radius-md);
-	overflow: hidden;
-	box-shadow: var(--hf-shadow-sm);
-	border: 1px solid rgba(29,29,27,0.06);
-	transition: transform 0.25s var(--hf-ease), box-shadow 0.25s var(--hf-ease);
-	padding: 0 0 1.1rem !important;
-	margin: 0 !important;
-}
-ul.products li.product:hover { transform: translateY(-6px); box-shadow: var(--hf-shadow-md); }
+.wc-block-components-product-image img,
+.wc-block-grid__product-image img,
 ul.products li.product img {
-	width: 100%;
 	aspect-ratio: 4/3;
 	object-fit: cover;
-	border-radius: 0 !important;
+	width: 100%;
+	height: auto !important;
+	/* La card ya tiene overflow:hidden + radius, pero se fuerza acá también
+	   por si algún wrapper intermedio no queda perfectamente flush al borde. */
+	border-radius: var(--hf-radius-md) var(--hf-radius-md) 0 0 !important;
 	margin: 0 0 0.9rem !important;
 }
-ul.products li.product .woocommerce-loop-product__title {
-	font-family: var(--wp--preset--font-family--display);
-	font-size: 1.05rem;
-	font-weight: 600;
-	padding-inline: 1.1rem;
-	margin: 0 0 0.35rem;
-}
-ul.products li.product .price {
-	padding-inline: 1.1rem;
-	color: var(--wp--preset--color--primary-dark);
-	font-weight: 700;
-}
-ul.products li.product .button {
-	display: block;
-	margin: 0.75rem 1.1rem 0 !important;
-	width: calc(100% - 2.2rem);
-	border-radius: 999px !important;
-	background: var(--wp--preset--color--primary) !important;
-	color: #fff !important;
-	font-size: 0.9rem !important;
-	padding: 0.7rem 1rem !important;
-	text-align: center;
-	transition: background 0.2s var(--hf-ease);
-}
-ul.products li.product .button:hover { background: var(--wp--preset--color--accent) !important; }
-ul.products li.product .star-rating { display: none; }
 
 .wc-block-components-product-title,
-.wp-block-post-title {
+.wp-block-post-title,
+ul.products li.product .woocommerce-loop-product__title {
 	font-family: var(--wp--preset--font-family--display);
-	font-size: 1.05rem !important;
+	font-size: 1.02rem !important;
 	font-weight: 600;
+	line-height: 1.3;
 	padding-inline: 1.1rem;
-	margin: 0.9rem 0 0.35rem;
+	margin: 0 0 0.3rem;
+	text-align: left;
 }
+.wc-block-components-product-title a,
+.wp-block-post-title a,
+ul.products li.product .woocommerce-loop-product__title a {
+	text-decoration: none !important;
+	color: inherit;
+}
+.wc-block-components-product-title a:hover,
+.wp-block-post-title a:hover,
+ul.products li.product .woocommerce-loop-product__title a:hover {
+	color: var(--wp--preset--color--accent);
+}
+
+.hf-card-tagline {
+	padding-inline: 1.1rem;
+	margin: 0 0 0.5rem;
+	font-size: 0.82rem;
+	line-height: 1.4;
+	color: var(--wp--preset--color--muted);
+	text-align: left;
+}
+
 .wc-block-components-product-price,
 .price {
 	padding-inline: 1.1rem;
 	color: var(--wp--preset--color--primary-dark);
 	font-weight: 700;
+	text-align: left;
+	margin-bottom: 0.75rem;
 }
-.wp-block-woocommerce-product-button,
-.wc-block-components-product-button {
+
+/* Fila de 2 acciones: "Añadir" + "Ver producto", compactas y a la izquierda.
+   Insertadas/reordenadas por assets/js/product-card-actions.js sin remover los
+   nodos originales de WooCommerce (conserva el comportamiento de AJAX add-to-cart). */
+.hf-card-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
 	padding-inline: 1.1rem;
-	margin-top: 0.75rem;
+	margin-top: auto;
+	padding-top: 0.25rem;
 }
-.wp-block-woocommerce-product-button .wp-block-button__link,
-.wc-block-components-product-button__button {
-	width: 100%;
+.hf-card-actions .wp-block-woocommerce-product-button,
+.hf-card-actions .wc-block-components-product-button {
+	padding-inline: 0;
+	margin-top: 0;
+	flex: none;
+}
+.hf-card-actions .wp-block-woocommerce-product-button .wp-block-button__link,
+.hf-card-actions .wc-block-components-product-button__button,
+.hf-card-actions a.add_to_cart_button,
+.hf-card-actions a.button {
+	width: auto !important;
+	display: inline-flex !important;
+	align-items: center;
 	border-radius: 999px !important;
 	background: var(--wp--preset--color--primary) !important;
-	font-size: 0.9rem !important;
-	padding: 0.7rem 1rem !important;
+	color: #fff !important;
+	font-size: 0.82rem !important;
+	font-weight: 600;
+	padding: 0.5rem 0.95rem !important;
+	line-height: 1.2;
+	text-align: center;
+	transition: background 0.2s var(--hf-ease);
 }
-.wp-block-woocommerce-product-button .wp-block-button__link:hover,
-.wc-block-components-product-button__button:hover {
+.hf-card-actions .wp-block-woocommerce-product-button .wp-block-button__link:hover,
+.hf-card-actions .wc-block-components-product-button__button:hover,
+.hf-card-actions a.add_to_cart_button:hover,
+.hf-card-actions a.button:hover {
 	background: var(--wp--preset--color--accent) !important;
 }
+.hf-card-view-link {
+	display: inline-flex;
+	align-items: center;
+	border-radius: 999px;
+	border: 1px solid rgba(29,29,27,0.16);
+	color: var(--wp--preset--color--primary-dark);
+	font-size: 0.82rem;
+	font-weight: 600;
+	padding: 0.5rem 0.95rem;
+	line-height: 1.2;
+	text-decoration: none;
+	transition: border-color 0.2s var(--hf-ease), color 0.2s var(--hf-ease), background 0.2s var(--hf-ease);
+}
+.hf-card-view-link:hover {
+	border-color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--primary-dark);
+	background: var(--wp--preset--color--accent-soft);
+}
+
+ul.products li.product .star-rating { display: none; }
 
 /* ==========================================================================
    Pasos "Cómo hacer tu pedido"
