@@ -37,8 +37,12 @@
 			'.wp-block-woocommerce-product-button button'
 		);
 		if ( ! inner ) return null;
+		// Devuelve el wrapper de más alto nivel que envuelve solo al botón, para
+		// moverlo entero (así el <a> real de WooCommerce mantiene su contexto AJAX).
 		return inner.closest( '.wp-block-woocommerce-product-button' )
 			|| inner.closest( '.wc-block-components-product-button' )
+			|| inner.closest( '.wc-block-grid__product-add-to-cart' )
+			|| inner.closest( '.wp-block-button' )
 			|| inner;
 	}
 
@@ -62,16 +66,25 @@
 		}
 
 		// Fila de acciones: mueve el botón real de WooCommerce (conserva su
-		// comportamiento AJAX intacto) y agrega "Ver producto" al lado.
+		// comportamiento AJAX intacto) y agrega "Ver" al lado.
 		var actions = document.createElement( 'div' );
 		actions.className = 'hf-card-actions';
 		addToCartWrap.parentNode.insertBefore( actions, addToCartWrap );
 		actions.appendChild( addToCartWrap );
 
+		// "Añadir al carrito" es muy largo para una card angosta con 2 botones.
+		// Se acorta a "Añadir" (el add-to-cart AJAX usa data-attributes, no el
+		// texto, así que sigue funcionando). Solo aplica al markup clásico donde
+		// el label es texto directo del anchor.
+		var addBtn = actions.querySelector( 'a.add_to_cart_button' );
+		if ( addBtn && /añadir al carrito/i.test( addBtn.textContent ) ) {
+			addBtn.textContent = 'Añadir';
+		}
+
 		var viewLink = document.createElement( 'a' );
 		viewLink.className = 'hf-card-view-link';
 		viewLink.href = permalink;
-		viewLink.textContent = 'Ver producto';
+		viewLink.textContent = 'Ver';
 		actions.appendChild( viewLink );
 	}
 

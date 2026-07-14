@@ -63,6 +63,9 @@ summary:focus-visible,
 
 .hf-section { padding-block: clamp(2.5rem, 4vw, 5rem); }
 .hf-section--tight { padding-block: clamp(1.5rem, 2.5vw, 3rem); }
+/* La primera sección de la página va pegada al header (sin doble aire arriba). */
+main > .hf-section:first-child,
+main > .hf-section--tight:first-child { padding-top: 1.25rem; }
 .hf-section--cream { background: var(--wp--preset--color--cream); }
 .hf-section--dark {
 	background: var(--wp--preset--color--primary-dark);
@@ -327,7 +330,8 @@ body.hf-no-scroll { overflow: hidden; }
 	overflow: hidden;
 	background: var(--wp--preset--color--cream);
 	border-radius: var(--hf-radius-lg);
-	margin-top: 1.5rem;
+	/* Sin margin-top: el padding-block de la sección contenedora ya da el aire.
+	   Antes se sumaban los dos y quedaba un hueco grande contra el header. */
 }
 .hf-hero::before {
 	content: "";
@@ -541,15 +545,27 @@ body.hf-no-scroll { overflow: hidden; }
 .hf-product-grid ul.wc-block-product-template,
 .wp-block-woocommerce-product-collection ul.wc-block-product-template,
 .wc-block-product-template,
-.wc-block-grid__products {
+.wc-block-grid__products,
+ul.products {
 	display: grid !important;
 	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
 	align-items: start !important;
 	gap: 1.75rem !important;
 	list-style: none;
 	padding: 0;
-	margin: 0;
+	margin: 0 0 2rem;
 }
+
+/* Sección clásica de "relacionados": WooCommerce imprime su propio <h2>
+   ("Productos relacionados") además del nuestro ("También te puede interesar"),
+   y envuelve todo en <section class="related products"> con float layout. */
+.related.products,
+.up-sells.products {
+	width: 100%;
+	float: none;
+}
+.related.products > h2,
+.up-sells.products > h2 { display: none; }
 
 .wc-block-product,
 .wc-block-grid__product,
@@ -600,6 +616,17 @@ ul.products li.product {
 	flex-direction: column;
 }
 
+/* En el markup clásico, imagen + título + precio van dentro de un <a> que
+   envuelve todo. Se lo normaliza a bloque sin padding para que la imagen
+   quede flush y el texto reciba el padding uniforme de abajo. */
+ul.products li.product > a.woocommerce-loop-product__link {
+	display: block;
+	padding: 0 !important;
+	margin: 0;
+	color: inherit;
+	text-decoration: none;
+}
+
 .wc-block-components-product-image img,
 .wc-block-grid__product-image img,
 ul.products li.product img {
@@ -614,14 +641,19 @@ ul.products li.product img {
 }
 
 .wc-block-components-product-title,
+.wc-block-grid__product-title,
 .wp-block-post-title,
 ul.products li.product .woocommerce-loop-product__title {
 	font-family: var(--wp--preset--font-family--display);
 	font-size: 1.02rem !important;
 	font-weight: 600;
 	line-height: 1.3;
-	padding-inline: 1.1rem;
-	margin: 0 0 0.3rem;
+	color: var(--wp--preset--color--ink);
+	/* !important para ganarle a la regla de WooCommerce core
+	   (.woocommerce ul.products li.product .woocommerce-loop-product__title
+	   { padding: .5em 0 }) que es más específica y dejaba el título pegado. */
+	padding: 0 1.1rem !important;
+	margin: 0 0 0.3rem !important;
 	text-align: left;
 }
 .wc-block-components-product-title a,
@@ -646,71 +678,98 @@ ul.products li.product .woocommerce-loop-product__title a:hover {
 }
 
 .wc-block-components-product-price,
+.wc-block-grid__product-price,
+ul.products li.product .price,
 .price {
-	padding-inline: 1.1rem;
-	color: var(--wp--preset--color--primary-dark);
+	padding: 0 1.1rem !important;
+	color: var(--wp--preset--color--primary-dark) !important;
 	font-weight: 700;
+	font-size: 1.05rem;
 	text-align: left;
-	margin-bottom: 0.75rem;
+	margin: 0 0 0.85rem !important;
 }
 
 /* Fila de 2 acciones: "Añadir" + "Ver producto", compactas y a la izquierda.
    Insertadas/reordenadas por assets/js/product-card-actions.js sin remover los
    nodos originales de WooCommerce (conserva el comportamiento de AJAX add-to-cart). */
+/* Fila de 2 acciones: ambos botones de igual ancho (flex:1) para que entren
+   siempre lado a lado y queden alineados, sin importar el largo de la etiqueta. */
 .hf-card-actions {
 	display: flex;
-	align-items: center;
-	gap: 0.6rem;
+	align-items: stretch;
+	gap: 0.5rem;
 	padding-inline: 1.1rem;
 	margin-top: auto;
 	padding-top: 0.25rem;
 }
 .hf-card-actions .wp-block-woocommerce-product-button,
-.hf-card-actions .wc-block-components-product-button {
+.hf-card-actions .wc-block-components-product-button,
+.hf-card-actions .wp-block-button,
+.hf-card-actions .wc-block-grid__product-add-to-cart {
 	padding-inline: 0;
-	margin-top: 0;
-	flex: none;
+	margin: 0 !important;
+	flex: 1 1 0;
+	min-width: 0;
+	display: flex;
 }
 .hf-card-actions .wp-block-woocommerce-product-button .wp-block-button__link,
 .hf-card-actions .wc-block-components-product-button__button,
+.hf-card-actions .wp-block-button .wp-block-button__link,
 .hf-card-actions a.add_to_cart_button,
-.hf-card-actions a.button {
-	width: auto !important;
+.hf-card-actions a.button,
+.hf-card-view-link {
+	flex: 1 1 0;
+	min-width: 0;
+	width: 100% !important;
 	display: inline-flex !important;
 	align-items: center;
+	justify-content: center;
 	border-radius: 999px !important;
-	background: var(--wp--preset--color--primary) !important;
-	color: #fff !important;
-	font-size: 0.82rem !important;
+	font-size: 0.8rem !important;
 	font-weight: 600;
-	padding: 0.5rem 0.95rem !important;
+	padding: 0.55rem 0.75rem !important;
 	line-height: 1.2;
 	text-align: center;
-	transition: background 0.2s var(--hf-ease);
+	white-space: nowrap;
+	text-decoration: none;
+	transition: background 0.2s var(--hf-ease), border-color 0.2s var(--hf-ease), color 0.2s var(--hf-ease);
+}
+.hf-card-actions .wp-block-woocommerce-product-button .wp-block-button__link,
+.hf-card-actions .wc-block-components-product-button__button,
+.hf-card-actions .wp-block-button .wp-block-button__link,
+.hf-card-actions a.add_to_cart_button,
+.hf-card-actions a.button {
+	background: var(--wp--preset--color--primary) !important;
+	color: #fff !important;
+	border: 1px solid var(--wp--preset--color--primary) !important;
 }
 .hf-card-actions .wp-block-woocommerce-product-button .wp-block-button__link:hover,
 .hf-card-actions .wc-block-components-product-button__button:hover,
+.hf-card-actions .wp-block-button .wp-block-button__link:hover,
 .hf-card-actions a.add_to_cart_button:hover,
 .hf-card-actions a.button:hover {
 	background: var(--wp--preset--color--accent) !important;
+	border-color: var(--wp--preset--color--accent) !important;
 }
 .hf-card-view-link {
-	display: inline-flex;
-	align-items: center;
-	border-radius: 999px;
-	border: 1px solid rgba(29,29,27,0.16);
+	background: #fff;
+	border: 1px solid rgba(29,29,27,0.16) !important;
 	color: var(--wp--preset--color--primary-dark);
-	font-size: 0.82rem;
-	font-weight: 600;
-	padding: 0.5rem 0.95rem;
-	line-height: 1.2;
-	text-decoration: none;
-	transition: border-color 0.2s var(--hf-ease), color 0.2s var(--hf-ease), background 0.2s var(--hf-ease);
 }
 .hf-card-view-link:hover {
-	border-color: var(--wp--preset--color--accent);
+	border-color: var(--wp--preset--color--accent) !important;
 	color: var(--wp--preset--color--primary-dark);
 	background: var(--wp--preset--color--accent-soft);
+}
+/* estado "añadido" que WooCommerce agrega tras el AJAX add-to-cart */
+.hf-card-actions a.added_to_cart {
+	flex: 1 1 100%;
+	margin-top: 0.4rem;
+	font-size: 0.75rem !important;
+	color: var(--wp--preset--color--primary) !important;
+	background: transparent !important;
+	border: none !important;
+	text-decoration: underline;
 }
 
 ul.products li.product .star-rating { display: none; }
