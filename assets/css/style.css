@@ -23,6 +23,14 @@
 	}
 }
 
+/* Guard global contra scroll horizontal. Se usa overflow-x: clip (no hidden):
+   hidden crearía un contenedor de scroll y rompería el position:sticky del
+   header; clip recorta el desborde sin ese efecto secundario. */
+html, body {
+	max-width: 100%;
+	overflow-x: clip;
+}
+
 body {
 	background: #fff;
 	color: var(--wp--preset--color--ink);
@@ -549,7 +557,12 @@ body.hf-no-scroll { overflow: hidden; }
 ul.products {
 	display: grid !important;
 	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
-	align-items: start !important;
+	/* stretch (default) para que las cards de una misma fila queden de igual
+	   alto y sus botones alineen; el contenido interno empuja la fila de
+	   acciones al fondo con margin-top:auto. */
+	align-items: stretch !important;
+	justify-content: start !important;
+	grid-auto-flow: row !important;
 	gap: 1.75rem !important;
 	list-style: none;
 	padding: 0;
@@ -558,14 +571,24 @@ ul.products {
 
 /* Sección clásica de "relacionados": WooCommerce imprime su propio <h2>
    ("Productos relacionados") además del nuestro ("También te puede interesar"),
-   y envuelve todo en <section class="related products"> con float layout. */
+   y envuelve todo en <section class="related products"> con su propio grid
+   (columns-4) que dejaba una celda vacía al inicio. Se fuerza el grid del tema
+   y se resetea cualquier grid-column/row que WooCommerce ponga en los ítems. */
 .related.products,
 .up-sells.products {
 	width: 100%;
 	float: none;
+	margin: 0;
 }
 .related.products > h2,
 .up-sells.products > h2 { display: none; }
+.related.products ul.products li.product,
+.up-sells.products ul.products li.product {
+	grid-column: auto !important;
+	grid-row: auto !important;
+	float: none !important;
+	margin: 0 !important;
+}
 
 .wc-block-product,
 .wc-block-grid__product,
@@ -576,7 +599,7 @@ ul.products li.product {
 	box-shadow: var(--hf-shadow-sm);
 	border: 1px solid rgba(29,29,27,0.06);
 	transition: transform 0.25s var(--hf-ease), box-shadow 0.25s var(--hf-ease);
-	padding-bottom: 1.1rem;
+	padding-bottom: 1.25rem;
 	/* El bloque "Product Collection" con displayLayout:flex le inyecta a cada
 	   <li> un width/flex-basis en % pensado para un contenedor flex — al
 	   forzar el padre a display:grid ese % competía y angostaba la tarjeta
@@ -588,7 +611,6 @@ ul.products li.product {
 	min-width: 0 !important;
 	flex: none !important;
 	box-sizing: border-box !important;
-	align-self: start !important;
 	height: auto !important;
 }
 .wc-block-product:hover,
@@ -658,13 +680,17 @@ ul.products li.product .woocommerce-loop-product__title {
 }
 .wc-block-components-product-title a,
 .wp-block-post-title a,
-ul.products li.product .woocommerce-loop-product__title a {
+ul.products li.product .woocommerce-loop-product__title a,
+a.wc-block-grid__product-link,
+a.wc-block-grid__product-link .wc-block-grid__product-title,
+a.woocommerce-loop-product__link {
 	text-decoration: none !important;
 	color: inherit;
 }
 .wc-block-components-product-title a:hover,
 .wp-block-post-title a:hover,
-ul.products li.product .woocommerce-loop-product__title a:hover {
+ul.products li.product .woocommerce-loop-product__title a:hover,
+a.wc-block-grid__product-link:hover .wc-block-grid__product-title {
 	color: var(--wp--preset--color--accent);
 }
 
@@ -698,9 +724,8 @@ ul.products li.product .price,
 	display: flex;
 	align-items: stretch;
 	gap: 0.5rem;
-	padding-inline: 1.1rem;
+	padding: 0.5rem 1.1rem 0.35rem;
 	margin-top: auto;
-	padding-top: 0.25rem;
 }
 .hf-card-actions .wp-block-woocommerce-product-button,
 .hf-card-actions .wc-block-components-product-button,
@@ -721,13 +746,16 @@ ul.products li.product .price,
 	flex: 1 1 0;
 	min-width: 0;
 	width: 100% !important;
+	min-height: 42px;
+	box-sizing: border-box;
 	display: inline-flex !important;
 	align-items: center;
 	justify-content: center;
 	border-radius: 999px !important;
 	font-size: 0.8rem !important;
 	font-weight: 600;
-	padding: 0.55rem 0.75rem !important;
+	padding: 0.5rem 0.75rem !important;
+	margin: 0 !important;
 	line-height: 1.2;
 	text-align: center;
 	white-space: nowrap;

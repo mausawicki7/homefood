@@ -15,11 +15,16 @@
 	function findPermalink( card ) {
 		var link = card.querySelector(
 			'a.woocommerce-loop-product__link, ' +
+			'a.wc-block-grid__product-link, ' +
 			'.wc-block-components-product-image a, ' +
 			'.wc-block-components-product-title a, ' +
 			'.wp-block-post-title a, ' +
 			'.woocommerce-loop-product__title a'
 		);
+		if ( ! link ) {
+			// Fallback: primer <a> con href real dentro de la card.
+			link = card.querySelector( 'a[href]:not(.add_to_cart_button):not(.added_to_cart)' );
+		}
 		return link ? link.getAttribute( 'href' ) : null;
 	}
 
