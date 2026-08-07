@@ -71,6 +71,53 @@ summary:focus-visible,
 	.hf-container { padding-inline: 1rem; }
 }
 
+/* Escapa del <main> constrained de FSE para que el fondo de una sección llegue
+   de borde a borde. Necesita SIEMPRE ir acompañado de la clase nativa de
+   Gutenberg "alignfull" en el HTML: el layout "constrained" del tema (ver
+   theme.json, contentSize 760px) le pone max-width a cualquier hijo directo
+   de <main> que NO tenga .alignfull/.alignwide — sin esa clase, width:100vw
+   queda sin efecto porque max-width le gana. El max-width:none de acá es un
+   refuerzo propio por si ese CSS global no se emitiera por algún motivo. */
+.hf-full-bleed {
+	width: 100vw;
+	max-width: none;
+	margin-left: calc(50% - 50vw);
+}
+/* 100vw incluye el ancho de la scrollbar vertical del navegador (cuando la
+   hay), así que una sección full-bleed queda un poco más ancha que el
+   viewport real y aparece scroll horizontal. No se puede poner overflow-x en
+   html/body (rompería el position:sticky del header, ver más abajo), así que
+   se aplica acá, un nivel por debajo: .wp-site-blocks es el wrapper que
+   WordPress genera automáticamente alrededor de todo el contenido del
+   template (header + main + footer) — abarca toda la altura de la página
+   igual que body/html, así que el sticky no se ve afectado, pero contiene el
+   overflow de cualquier .hf-full-bleed dentro. */
+.wp-site-blocks {
+	overflow-x: clip;
+}
+
+/* Oculta visualmente pero deja accesible para lectores de pantalla (patrón
+   sr-only estándar) — usado para el <h1> real del hero-slider, cuyo título
+   visible por slide es un <p> decorativo, no un heading. */
+.hf-visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Scroll-reveal genérico (home-motion.js, GSAP ScrollTrigger). El estado
+   oculto NO se define acá: lo aplica el propio JS (gsap.set) solo si GSAP
+   cargó y el usuario no pidió prefers-reduced-motion — si el script falla,
+   el contenido queda visible por default (progressive enhancement). Esta
+   clase solo marca qué elementos son candidatos a animar. */
+.hf-reveal { will-change: transform, opacity; }
+
 .hf-section { padding-block: clamp(2.5rem, 4vw, 5rem); }
 .hf-section--tight { padding-block: clamp(1.5rem, 2.5vw, 3rem); }
 /* La primera sección de la página va pegada al header (sin doble aire arriba). */
@@ -134,6 +181,14 @@ main > .hf-section--tight:first-child { padding-top: 1.25rem; }
 }
 .hf-btn--ghost-dark:hover { background: var(--wp--preset--color--primary); color: #fff; }
 
+/* Variante clara: para botones "ghost" sobre fondos oscuros/foto (hero-slider). */
+.hf-btn--ghost-light {
+	background: transparent;
+	border-color: rgba(255, 255, 255, 0.65);
+	color: #fdfdf9;
+}
+.hf-btn--ghost-light:hover { background: rgba(255, 255, 255, 0.16); border-color: #fff; }
+
 /* ==========================================================================
    Header
    ========================================================================== */
@@ -149,6 +204,29 @@ main > .hf-section--tight:first-child { padding-top: 1.25rem; }
 	position: sticky;
 	top: 0;
 	z-index: 100;
+}
+
+/* WordPress mete un blockGap por defecto (~2em) entre los hijos directos de
+   .wp-site-blocks (header/main/footer) cuando theme.json no lo desactiva
+   explícitamente — genera aire de más pegado al header (el hero no llega a
+   tocarlo) y una franja antes del footer. Se resetea acá, en el nivel raíz. */
+main.wp-block-group {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+.wp-site-blocks > footer.wp-block-template-part {
+	margin-top: 0;
+}
+
+/* Mismo blockGap por defecto, pero acá entre dos bloques HERMANOS dentro de
+   <main> (no relativo a header/footer): "Llegamos hasta la puerta de tu casa"
+   (full-bleed, fondo crema) y "Calentá y disfrutá en minutos" (full-bleed,
+   fondo oscuro) quedan pegados uno al otro, así que el ~2em de aire por
+   defecto se ve como una franja blanca (el fondo de página) entre dos
+   secciones de color — en el resto del home no se nota porque no hay dos
+   full-bleed consecutivos con fondos distintos. */
+.hf-zones-section + .hf-tips-section {
+	margin-top: 0 !important;
 }
 
 .hf-header {
@@ -333,8 +411,6 @@ main > .hf-section--tight:first-child { padding-top: 1.25rem; }
 	text-decoration: none;
 	border-bottom: 1px solid rgba(29,29,27,0.08);
 }
-.hf-mobile-nav__cta { width: 100%; margin-top: 1.5rem; }
-
 body.hf-no-scroll { overflow: hidden; }
 
 @media (max-width: 900px) {
@@ -344,82 +420,121 @@ body.hf-no-scroll { overflow: hidden; }
 }
 
 /* ==========================================================================
-   Hero
+   Hero — slider full-bleed (reemplaza la tarjeta estática; ver home-motion.js
+   para el autoplay, ken-burns y el stagger de texto por slide)
    ========================================================================== */
 
-.hf-hero {
+.hf-hero-slider {
 	position: relative;
+	height: 90vh;
+	height: 90svh; /* svh evita el salto por la barra de direcciones en mobile */
+	min-height: 560px;
+	max-height: 880px;
 	overflow: hidden;
-	background: var(--wp--preset--color--cream);
-	border-radius: var(--hf-radius-lg);
-	/* Sin margin-top: el padding-block de la sección contenedora ya da el aire.
-	   Antes se sumaban los dos y quedaba un hueco grande contra el header. */
+	background: var(--wp--preset--color--primary-dark);
 }
-.hf-hero::before {
-	content: "";
+
+.hf-hero-slider__slides { position: relative; height: 100%; }
+
+.hf-hero-slider__slide {
 	position: absolute;
-	top: -18%;
-	right: -12%;
-	width: 60%;
-	aspect-ratio: 1;
-	background: radial-gradient(circle at center, var(--wp--preset--color--accent-soft) 0%, rgba(231, 242, 223, 0) 70%);
-	border-radius: 50%;
+	inset: 0;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.9s var(--hf-ease);
+}
+.hf-hero-slider__slide.is-active {
+	opacity: 1;
+	pointer-events: auto;
+	z-index: 1;
+}
+
+.hf-hero-slider__bg {
+	position: absolute;
+	inset: 0;
+	background-image: var(--hf-slide-bg);
+	background-size: cover;
+	background-position: center;
+	transform-origin: center;
+	will-change: transform;
+	/* Fuerza una capa de composición GPU estable durante el ken-burns — sin
+	   esto, algunos navegadores "tiemblan" sutilmente al escalar en tiempo
+	   real una imagen con textura fina (la veta de madera del fondo), como
+	   si el nivel de detalle se recalculara con un frame de diferencia. */
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	transform: translateZ(0);
+}
+/* Doble degradado: el horizontal (izquierda→derecha) es el que realmente
+   protege la legibilidad del texto, que se superpone sobre el ~40% izquierdo
+   del cuadro — independiente de qué tan clara/oscura salga la foto ahí. El
+   vertical es el que ya había, para la barra de badges/controles de abajo. */
+.hf-hero-slider__scrim {
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(90deg, rgba(8, 26, 19, 0.65) 0%, rgba(8, 26, 19, 0.35) 32%, rgba(8, 26, 19, 0) 62%),
+		linear-gradient(180deg, rgba(10, 32, 23, 0.7) 0%, rgba(10, 32, 23, 0.22) 38%, rgba(10, 32, 23, 0.15) 58%, rgba(8, 26, 19, 0.85) 100%);
 	pointer-events: none;
 }
-.hf-hero__grid {
+
+.hf-hero-slider__content {
 	position: relative;
-	display: grid;
-	grid-template-columns: 1.1fr 0.9fr;
-	align-items: center;
-	gap: 2.5rem;
-	padding: clamp(2.5rem, 5vw, 5rem) clamp(1.5rem, 4vw, 4rem);
+	z-index: 2;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	color: #fdfdf9;
+	padding-bottom: clamp(6rem, 14vh, 9rem);
 }
-.hf-hero__eyebrow {
+.hf-hero-slider__eyebrow {
 	font-family: var(--wp--preset--font-family--body);
 	font-weight: 700;
 	font-size: 0.8rem;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--accent-soft);
 	display: block;
 	margin-bottom: 0.75rem;
-	opacity: 0;
-	animation: hf-fade-up 0.6s var(--hf-ease) forwards;
 }
-.hf-hero__title {
+.hf-hero-slider__title {
+	font-family: var(--wp--preset--font-family--display);
+	font-weight: 600;
 	font-size: var(--wp--preset--font-size--xx-large);
 	line-height: 1.02;
 	margin: 0 0 1.1rem;
-	color: var(--wp--preset--color--primary-dark);
-	opacity: 0;
-	animation: hf-fade-up 0.7s var(--hf-ease) 0.08s forwards;
+	color: #fdfdf9;
 }
-.hf-hero__title em {
+.hf-hero-slider__title em {
 	font-style: italic;
-	color: var(--wp--preset--color--accent);
+	/* Verde más claro y vibrante que el acento de marca (#54ac40): sobre el
+	   fondo oscuro del scrim, el acento normal se ve apagado. */
+	color: #8fe562;
 }
-.hf-hero__lead {
+.hf-hero-slider__lead {
 	font-size: 1.15rem;
-	color: var(--wp--preset--color--muted);
-	max-width: 42ch;
+	color: rgba(255, 255, 255, 0.85);
+	max-width: 46ch;
 	margin-bottom: 2rem;
-	opacity: 0;
-	animation: hf-fade-up 0.7s var(--hf-ease) 0.16s forwards;
 }
-.hf-hero__actions {
+.hf-hero-slider__actions {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem;
-	opacity: 0;
-	animation: hf-fade-up 0.7s var(--hf-ease) 0.24s forwards;
 }
-.hf-hero__badges {
+
+.hf-hero-slider__badges {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 84px;
+	z-index: 3;
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: center;
 	gap: 0.6rem;
-	margin-top: 2.25rem;
-	opacity: 0;
-	animation: hf-fade-up 0.7s var(--hf-ease) 0.32s forwards;
+	padding-inline: 1.5rem;
 }
 .hf-badge {
 	display: inline-flex;
@@ -434,101 +549,144 @@ body.hf-no-scroll { overflow: hidden; }
 	color: var(--wp--preset--color--primary-dark);
 	box-shadow: var(--hf-shadow-sm);
 }
+/* Variante glass — mismo lenguaje visual que .hf-steps--icons .hf-step,
+   para las badges de confianza flotando sobre la foto del hero. */
+.hf-badge--glass {
+	background: rgba(255, 255, 255, 0.14);
+	backdrop-filter: blur(10px) saturate(150%);
+	-webkit-backdrop-filter: blur(10px) saturate(150%);
+	border-color: rgba(255, 255, 255, 0.3);
+	color: #fdfdf9;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--hf-shadow-sm);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.hf-badge--glass { background: rgba(19, 68, 50, 0.65); }
+}
 
-.hf-hero__media {
-	position: relative;
-	aspect-ratio: 4 / 5;
-	border-radius: var(--hf-radius-lg);
-	overflow: hidden;
-	background: linear-gradient(155deg, var(--wp--preset--color--primary) 0%, var(--wp--preset--color--primary-dark) 100%);
+.hf-hero-slider__controls {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 18px;
+	z-index: 3;
 	display: flex;
-	align-items: flex-end;
-	padding: 1.75rem;
-	box-shadow: var(--hf-shadow-lg);
-	transform: rotate(1.2deg);
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
 }
-.hf-hero__media-card {
-	background: rgba(255,255,255,0.96);
-	border-radius: var(--hf-radius-md);
-	padding: 1.1rem 1.3rem;
-	box-shadow: var(--hf-shadow-md);
-	font-size: 0.85rem;
-	font-weight: 600;
-	color: var(--wp--preset--color--primary-dark);
-	max-width: 240px;
-}
-
-@keyframes hf-fade-up {
-	from { opacity: 0; transform: translateY(16px); }
-	to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 900px) {
-	.hf-hero__grid { grid-template-columns: 1fr; }
-	.hf-hero__media { aspect-ratio: 16 / 10; transform: none; margin-top: 1.75rem; }
-}
-
-/* ==========================================================================
-   Propuesta de valor
-   ========================================================================== */
-
-.hf-values__grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-	gap: 1.5rem;
-}
-.hf-value { text-align: center; padding: 0.5rem; }
-.hf-value__icon {
+.hf-hero-slider__arrow {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 56px; height: 56px;
+	width: 44px;
+	height: 44px;
 	border-radius: 50%;
-	background: var(--wp--preset--color--accent-soft);
-	font-size: 1.6rem;
-	margin-bottom: 1rem;
+	background: rgba(255, 255, 255, 0.14);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	color: #fdfdf9;
+	cursor: pointer;
+	transition: transform 0.2s var(--hf-ease), background 0.2s var(--hf-ease);
 }
-.hf-value h3 { font-size: 1.05rem; margin: 0 0 0.4rem; }
-.hf-value p { font-size: 0.9rem; color: var(--wp--preset--color--muted); margin: 0; line-height: 1.55; }
+.hf-hero-slider__arrow svg { width: 18px; height: 18px; }
+.hf-hero-slider__arrow:hover { background: rgba(255, 255, 255, 0.28); transform: scale(1.06); }
+.hf-hero-slider__dots { display: flex; align-items: center; gap: 0.5rem; }
+.hf-hero-slider__dot {
+	width: 10px;
+	height: 10px;
+	padding: 0;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	background: rgba(255, 255, 255, 0.25);
+	cursor: pointer;
+	transition: background 0.2s var(--hf-ease), transform 0.2s var(--hf-ease);
+}
+.hf-hero-slider__dot.is-active { background: #fff; transform: scale(1.25); }
+
+@media (max-width: 900px) {
+	/* En mobile las badges dejan de flotar como overlay absoluto (con textos
+	   largos se superponían con el lead/los botones) y pasan al flujo normal,
+	   debajo de los botones — alineadas a la izquierda, igual que "Ver el
+	   catálogo"/"¿Cómo funciona?", en vez de centradas. */
+	.hf-hero-slider__badges {
+		position: static;
+		justify-content: flex-start;
+		padding-inline: 0;
+		margin-top: 1.25rem;
+		gap: 0.5rem;
+	}
+	.hf-hero-slider__badges .hf-badge { font-size: 0.72rem; padding: 0.4rem 0.75rem; }
+	/* Ya no hay que reservar aire para una barra de badges absoluta — solo
+	   para los controles (flechas/dots), que siguen anclados abajo. */
+	.hf-hero-slider__content { padding-bottom: clamp(3.5rem, 10vh, 5rem); }
+}
+@media (max-width: 480px) {
+	.hf-hero-slider { min-height: 640px; }
+}
 
 /* ==========================================================================
    Categorías
    ========================================================================== */
 
 .hf-cats {
+	/* 7 categorías en desktop: 4 arriba + 3 abajo, sin huecos. Grid de 12
+	   columnas: las primeras 4 cards ocupan 3 tracks, las últimas 3 ocupan 4. */
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	grid-template-columns: repeat(12, 1fr);
 	gap: 1rem;
 }
+.hf-cats > * { grid-column: span 3; }
+.hf-cats > *:nth-child(n + 5) { grid-column: span 4; }
 @media (max-width: 640px) {
-	/* auto-fit estira el último ítem impar a todo el ancho; con 7 categorías
-	   se ve roto. Un grid fijo de 2 columnas es predecible en cualquier cantidad. */
+	/* En mobile, un grid fijo de 2 columnas es predecible en cualquier cantidad. */
 	.hf-cats { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+	.hf-cats > *, .hf-cats > *:nth-child(n + 5) { grid-column: auto; }
 }
 .hf-cat-card {
+	position: relative;
 	display: flex;
 	flex-direction: column;
+	justify-content: flex-end;
 	gap: 0.6rem;
-	padding: 1.5rem 1.25rem;
+	min-height: 168px;
+	padding: 1.25rem;
 	border-radius: var(--hf-radius-md);
-	background: var(--wp--preset--color--cream);
+	background-color: var(--wp--preset--color--cream);
+	background-image: linear-gradient(180deg, rgba(15, 40, 30, 0.1) 0%, rgba(15, 40, 30, 0.72) 100%), var(--hf-cat-photo);
+	background-size: cover, cover;
+	background-position: center, center;
 	text-decoration: none;
-	color: var(--wp--preset--color--ink);
-	transition: transform 0.25s var(--hf-ease), box-shadow 0.25s var(--hf-ease), background 0.25s var(--hf-ease);
+	color: #fff;
+	transition: transform 0.3s var(--hf-ease), box-shadow 0.35s var(--hf-ease);
 }
 .hf-cat-card:hover {
-	transform: translateY(-4px);
-	box-shadow: var(--hf-shadow-md);
-	background: #fff;
+	transform: translateY(-4px) scale(1.04);
+	box-shadow: 0 0 34px 8px rgba(84, 172, 64, 0.45), var(--hf-shadow-lg);
+	z-index: 1;
 }
+.hf-cat-card--clasicos    { --hf-cat-photo: var(--hf-img-cat-clasicos); }
+.hf-cat-card--combos      { --hf-cat-photo: var(--hf-img-cat-combos); }
+.hf-cat-card--fitness     { --hf-cat-photo: var(--hf-img-cat-fitness); }
+.hf-cat-card--keto        { --hf-cat-photo: var(--hf-img-cat-keto); }
+.hf-cat-card--ensaladas   { --hf-cat-photo: var(--hf-img-cat-ensaladas); }
+.hf-cat-card--emp-pizza   { --hf-cat-photo: var(--hf-img-cat-emp-pizza); }
+.hf-cat-card--vegetariano { --hf-cat-photo: var(--hf-img-cat-vegetariano); }
 .hf-cat-card__icon {
-	width: 42px; height: 42px;
+	width: 36px; height: 36px;
 	border-radius: 50%;
-	background: var(--wp--preset--color--accent-soft);
+	background: rgba(255, 255, 255, 0.92);
+	color: var(--wp--preset--color--primary-dark);
 	display: flex; align-items: center; justify-content: center;
-	font-size: 1.35rem;
+	font-size: 1.2rem;
 }
-.hf-cat-card__name { font-weight: 600; font-size: 0.98rem; }
+.hf-cat-card__name { font-weight: 600; font-size: 0.98rem; text-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+@media (min-width: 641px) {
+	/* Con 4 por fila las cards son más anchas: más altura y texto en proporción. */
+	.hf-cat-card { min-height: 230px; }
+	.hf-cat-card__name { font-size: 1.15rem; }
+	.hf-cat-card__icon { width: 42px; height: 42px; font-size: 1.35rem; }
+}
 
 /* ==========================================================================
    Pills de categoría (archivo de productos)
@@ -757,6 +915,7 @@ ul.products li.product .price,
    siempre lado a lado y queden alineados, sin importar el largo de la etiqueta. */
 .hf-card-actions {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: stretch;
 	gap: 0.5rem;
 	padding: 0.5rem 1.1rem 0.35rem;
@@ -794,6 +953,8 @@ ul.products li.product .price,
 	line-height: 1.2;
 	text-align: center;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	text-decoration: none;
 	transition: background 0.2s var(--hf-ease), border-color 0.2s var(--hf-ease), color 0.2s var(--hf-ease);
 }
@@ -824,15 +985,14 @@ ul.products li.product .price,
 	color: var(--wp--preset--color--primary-dark);
 	background: var(--wp--preset--color--accent-soft);
 }
-/* estado "añadido" que WooCommerce agrega tras el AJAX add-to-cart */
+/* Link "Ver carrito" que WooCommerce agrega tras el AJAX add-to-cart: se
+   oculta en las cards de listado a propósito. Con el mínimo de 7 viandas
+   el usuario agrega muchas seguidas antes de ir al carrito, así que este
+   link por card es ruido/fricción — el feedback pasa a ser el propio botón
+   (ver product-cards.js, showAddedFeedback) y el estado del pedido lo lleva
+   la barra de progreso del header. */
 .hf-card-actions a.added_to_cart {
-	flex: 1 1 100%;
-	margin-top: 0.4rem;
-	font-size: 0.75rem !important;
-	color: var(--wp--preset--color--primary) !important;
-	background: transparent !important;
-	border: none !important;
-	text-decoration: underline;
+	display: none;
 }
 
 ul.products li.product .star-rating { display: none; }
@@ -871,6 +1031,241 @@ ul.products li.product .star-rating { display: none; }
 .hf-step h3 { margin: 0; font-size: 1.1rem; }
 .hf-step p { color: var(--wp--preset--color--muted); margin: 0; line-height: 1.6; }
 
+/* Variante con ícono en lugar de número (sección "Calentá y disfrutá") */
+.hf-steps--icons .hf-step::before { content: none; }
+.hf-step__icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--primary);
+	color: #fff;
+	font-size: 1.35rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+.hf-step__icon .hf-icon { vertical-align: 0; }
+
+/* Fondo de la sección "Calentá y disfrutá": degradado de marca con un par de
+   manchas radiales suaves, lo bastante oscuro para que las cards de vidrio
+   de abajo tengan contraste. */
+.hf-tips-section {
+	background:
+		radial-gradient(1100px 550px at 12% -15%, rgba(84, 172, 64, 0.35), transparent 60%),
+		radial-gradient(900px 500px at 92% 115%, rgba(193, 80, 46, 0.28), transparent 55%),
+		linear-gradient(135deg, var(--wp--preset--color--primary-dark) 0%, var(--wp--preset--color--primary) 100%);
+}
+.hf-tips-section .hf-eyebrow { color: var(--wp--preset--color--accent-soft); }
+
+/* Glassmorphism: blur del fondo + tinte blanco translúcido + brillo superior
+   (aproximación en CSS puro del "liquid glass" — sin el filtro SVG de
+   distorsión del original en React, que necesita contenido fotográfico
+   detrás para notarse y no compensa su costo contra un fondo degradado). */
+.hf-steps--icons .hf-step {
+	position: relative;
+	background:
+		linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 45%),
+		rgba(255, 255, 255, 0.12);
+	backdrop-filter: blur(20px) saturate(150%);
+	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: var(--hf-radius-lg);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.4),
+		0 12px 32px rgba(10, 40, 28, 0.28);
+	transition:
+		transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 2.2),
+		background 0.4s var(--hf-ease),
+		box-shadow 0.4s var(--hf-ease);
+}
+.hf-steps--icons .hf-step:hover {
+	transform: translateY(-6px);
+	background:
+		linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%),
+		rgba(255, 255, 255, 0.18);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.5),
+		0 20px 40px rgba(10, 40, 28, 0.35);
+}
+.hf-steps--icons .hf-step h3 { color: #fdfdf9; }
+.hf-steps--icons .hf-step p { color: rgba(255, 255, 255, 0.8); }
+/* Fallback para navegadores sin soporte de backdrop-filter (viejos): tinte
+   más sólido para que el texto siga siendo legible sin el blur. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.hf-steps--icons .hf-step { background: rgba(19, 68, 50, 0.55); }
+}
+
+/* ==========================================================================
+   "Tu pedido, paso a paso" — journey vertical, pasos alternados
+   izquierda/derecha, cada uno con su propio ícono/placeholder de foto,
+   revelados onScroll (home-motion.js, ScrollTrigger). Reemplaza al roadmap
+   horizontal original.
+   ========================================================================== */
+
+.hf-journey {
+	position: relative;
+	margin-top: 3.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: clamp(3.5rem, 7vw, 6rem);
+}
+/* Línea vertical de fondo: el track punteado completo, siempre visible. */
+.hf-journey::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	width: 3px;
+	border-left: 3px dashed rgba(30, 108, 79, 0.25);
+	transform: translateX(-1.5px);
+	z-index: 0;
+}
+
+/* Barra sólida que "carga" hacia abajo con el scroll (home-motion.js,
+   ScrollTrigger con scrub) por encima del track punteado, con un cursor en
+   forma de cubiertos viajando en la punta — como si el tenedor recorriera el
+   camino a medida que se lee la sección. */
+.hf-journey__path {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	width: 3px;
+	transform: translateX(-1.5px);
+	z-index: 1;
+	pointer-events: none;
+}
+.hf-journey__path-fill {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--wp--preset--color--primary);
+	transform-origin: top center;
+	transform: scaleY(0);
+	box-shadow: 0 0 8px rgba(30, 108, 79, 0.5);
+}
+/* Mismo look que .hf-journey__badge (es "el mismo número" viajando) — pero el
+   centrado usa margin en vez de transform: la animación de "impacto" al
+   cambiar de número anima transform:scale() con GSAP, y si el centrado
+   también viviera en transform, GSAP podría pisarlo al tomar control de la
+   propiedad. width/height son fijos (no %), así que el margin negativo de
+   la mitad centra igual de bien sin tocar transform para nada. */
+.hf-journey__cursor {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 42px;
+	height: 42px;
+	margin-left: -21px;
+	margin-top: -21px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--primary);
+	color: #fff;
+	font-family: var(--wp--preset--font-family--display);
+	font-weight: 700;
+	font-size: 1.1rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: var(--hf-shadow-md), 0 0 0 5px var(--wp--preset--color--base);
+}
+
+.hf-journey__step {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-areas: "media content";
+	align-items: center;
+	gap: clamp(2rem, 5vw, 4rem);
+}
+.hf-journey__step--media-right { grid-template-areas: "content media"; }
+.hf-journey__media { grid-area: media; }
+.hf-journey__content { grid-area: content; }
+
+/* Numerito sobre la línea central, con un anillo del color de fondo de la
+   sección para que se "corte" la línea punteada detrás. */
+.hf-journey__badge {
+	position: absolute;
+	top: -2.5rem;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 2;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--primary);
+	color: #fff;
+	font-family: var(--wp--preset--font-family--display);
+	font-weight: 700;
+	font-size: 1.2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: var(--hf-shadow-md), 0 0 0 6px var(--wp--preset--color--base);
+}
+
+/* Placeholder de foto por paso: hoy es un ícono grande sobre un fondo
+   degradado suave; el día que haya foto real de cada paso, se reemplaza este
+   fondo por background-image (mismo criterio que --hf-img-hero/--hf-cat-*). */
+.hf-journey__media {
+	aspect-ratio: 4 / 3;
+	border-radius: var(--hf-radius-lg);
+	/* --hf-step-photo (seteada inline por paso) es la foto real; si no está
+	   seteada, cae al degradado suave de antes — mismo mecanismo de fallback
+	   que el resto de las imágenes del tema (--hf-img-hero, --hf-img-cat-*). */
+	background-image: var( --hf-step-photo, linear-gradient(155deg, var(--wp--preset--color--accent-soft) 0%, var(--wp--preset--color--cream) 100%) );
+	background-size: cover;
+	background-position: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: var(--hf-shadow-md);
+	overflow: hidden;
+}
+.hf-journey__media-icon {
+	width: 88px;
+	height: 88px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--primary);
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.hf-journey__media-icon .hf-icon { width: 2em; height: 2em; }
+
+.hf-journey__content h3 {
+	margin: 0 0 0.6rem;
+	font-size: 1.4rem;
+}
+.hf-journey__content p {
+	color: var(--wp--preset--color--muted);
+	margin: 0;
+	max-width: 40ch;
+	line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+	/* Con un solo paso por fila ya no hay "izquierda/derecha" que remarcar,
+	   y la línea central cruzaría el texto en el medio — se saca (junto con
+	   la barra de carga y el cursor, que viven sobre esa misma línea). */
+	.hf-journey::before,
+	.hf-journey__path { display: none; }
+	.hf-journey__step,
+	.hf-journey__step--media-right {
+		grid-template-columns: 1fr;
+		grid-template-areas: "media" "content";
+		gap: 1.5rem;
+	}
+	.hf-journey__badge { top: -1.75rem; }
+	.hf-journey__content p { max-width: none; }
+}
+
 /* ==========================================================================
    Zonas y costos de envío
    ========================================================================== */
@@ -879,11 +1274,18 @@ ul.products li.product .star-rating { display: none; }
 .hf-zones-intro { max-width: 46ch; margin-bottom: 2rem; }
 .hf-zones-intro__lead { color: var(--wp--preset--color--muted); margin: 0.5rem 0 0; }
 
-.hf-zones {
+/* Cards apiladas a la izquierda, mapa a la derecha ocupando el mismo alto. */
+.hf-zones-layout {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: 1fr 1.3fr;
 	gap: 1.25rem;
+	align-items: stretch;
 	margin-bottom: 2rem;
+}
+.hf-zones {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
 }
 .hf-zone-card {
 	background: #fff;
@@ -920,6 +1322,27 @@ ul.products li.product .star-rating { display: none; }
 .hf-zone-card__more[open] summary::after { content: " ↑"; }
 .hf-zone-card__more p { margin-top: 0.6rem; }
 
+.hf-zones-map {
+	position: relative;
+	margin: 0;
+	min-height: 360px;
+	border-radius: var(--hf-radius-md);
+	overflow: hidden;
+	box-shadow: var(--hf-shadow-md);
+}
+/* My Maps no tiene parámetro para ocultar la barra de título ("Mapa ... de ...")
+   ni el aviso "Este mapa se hizo con Google My Maps" que aparece debajo: se
+   recorta todo con CSS, renderizando el iframe más alto y corriéndolo hacia
+   arriba para que esa franja quede fuera del área visible del contenedor. */
+.hf-zones-map iframe {
+	position: absolute;
+	top: -90px;
+	left: 0;
+	width: 100%;
+	height: calc(100% + 90px);
+	border: 0;
+}
+
 .hf-shipping-costs {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
@@ -954,7 +1377,9 @@ ul.products li.product .star-rating { display: none; }
 .hf-cost-card--evening { border-left: 4px solid #e0a83c; }
 
 @media (max-width: 900px) {
-	.hf-zones, .hf-shipping-costs { grid-template-columns: 1fr; }
+	.hf-zones-layout { grid-template-columns: 1fr; }
+	.hf-zones-map { aspect-ratio: 1080 / 680; min-height: 0; }
+	.hf-shipping-costs { grid-template-columns: 1fr; }
 }
 
 /* ==========================================================================
@@ -1057,27 +1482,94 @@ ul.products li.product .star-rating { display: none; }
 }
 .hf-carousel__dot.is-active::before { background: var(--wp--preset--color--accent); transform: scale(1.3); }
 
+/* Carrusel de productos ("Los platos que todos repiten"): reutiliza los
+   controles/puntos del carrusel de testimonios (.hf-carousel__controls,
+   __arrow, __dots, __dot) pero con su propio track — a diferencia del de
+   testimonios (1 slide = 1 tarjeta), acá cada "página" agrupa varias tarjetas
+   (4 en desktop, 2 en tablet, 1 en mobile), moviéndose siempre -100% por
+   página gracias a que el ancho de las tarjetas + gaps completa el 100% del
+   viewport. Las tarjetas (<li class="product">) las arma el shortcode nativo
+   de WooCommerce [best_selling_products] (ver homefood_bestsellers_carousel_html
+   en functions.php), así que ya traen el estilo de .wc-block-grid__product /
+   ul.products li.product de más arriba — acá solo se pisa el display (grid → flex)
+   y el ancho de cada tarjeta, con más classes para ganarle en especificidad a
+   esas reglas (mismo criterio que .related.products más arriba). */
+.hf-product-carousel { margin-top: 2.5rem; margin-bottom: 2rem; }
+.hf-product-carousel__viewport { overflow: hidden; }
+.hf-product-carousel__track.products {
+	display: flex !important;
+	gap: 1.25rem !important;
+	list-style: none;
+	padding: 0.25rem 0.15rem !important;
+	margin: 0 !important;
+	transition: transform 0.5s var(--hf-ease);
+}
+/* WooCommerce clásico arma su grid de "columns-4" con márgen/float propios
+   (o, en versiones más nuevas, su propio "gap" de grid) — se neutralizan acá
+   con !important para que el único responsable del espaciado horizontal sea
+   el "gap" del flex de arriba, y así el cálculo de 4 tarjetas por página
+   (JS: translateX(-page*100%)) cierre exacto. */
+.hf-product-carousel__track.products > li.product {
+	flex: 0 0 calc((100% - 3 * 1.25rem) / 4) !important;
+	max-width: calc((100% - 3 * 1.25rem) / 4) !important;
+	width: auto !important;
+	min-width: 0;
+	margin: 0 !important;
+	float: none !important;
+}
+@media (max-width: 900px) {
+	.hf-product-carousel__track.products > li.product {
+		flex: 0 0 calc((100% - 1.25rem) / 2) !important;
+		max-width: calc((100% - 1.25rem) / 2) !important;
+	}
+}
+@media (max-width: 640px) {
+	.hf-product-carousel__track.products > li.product {
+		flex: 0 0 100% !important;
+		max-width: 100% !important;
+	}
+}
+
+/* Este carrusel es solo una pasarela rápida de "favoritos" — sin tagline ni
+   precio, solo título + los 2 botones (Añadir/Ver), a diferencia del resto de
+   las grillas de producto del sitio (relacionados, tienda) que sí los
+   muestran. Scoped a .hf-product-carousel para no afectar esas otras grillas,
+   que reutilizan las mismas clases de WooCommerce. */
+.hf-product-carousel .hf-card-tagline,
+.hf-product-carousel .price {
+	display: none !important;
+}
+.hf-product-carousel .woocommerce-loop-product__title {
+	margin-bottom: 0.75rem !important;
+}
+
 /* ==========================================================================
    CTA WhatsApp
    ========================================================================== */
 
+/* La sección misma es full-bleed (fondo de borde a borde); .hf-cta-whatsapp__inner
+   es el .hf-container adentro que arma el layout flex de siempre. */
 .hf-cta-whatsapp {
+	background-color: var(--wp--preset--color--primary-dark);
+	background-image: linear-gradient(120deg, rgba(19, 68, 50, 0.92) 0%, rgba(19, 68, 50, 0.8) 100%), var(--hf-img-bg-cta-whatsapp);
+	background-size: cover;
+	background-position: center;
+	color: #fff;
+}
+.hf-cta-whatsapp__inner {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 1.5rem;
-	background: var(--wp--preset--color--primary-dark);
-	color: #fff;
-	border-radius: var(--hf-radius-lg);
-	padding: clamp(1.75rem, 4vw, 3rem);
 }
 @media (max-width: 640px) {
-	.hf-cta-whatsapp { flex-direction: column; align-items: stretch; text-align: center; }
-	.hf-cta-whatsapp .hf-btn { width: 100%; }
+	.hf-cta-whatsapp__inner { flex-direction: column; align-items: stretch; text-align: center; }
+	.hf-cta-whatsapp__inner .hf-btn { width: 100%; }
 }
 .hf-cta-whatsapp h2 { color: #fff; margin: 0 0 0.4rem; }
 .hf-cta-whatsapp p { color: rgba(255,255,255,0.75); margin: 0; }
+.hf-cta-whatsapp__phone { white-space: nowrap; }
 
 /* ==========================================================================
    Carrito — barra de progreso hacia el mínimo
@@ -1190,6 +1682,46 @@ ul.products li.product .star-rating { display: none; }
 	width: 100%;
 }
 .hf-product-gallery .woocommerce-product-gallery { border-radius: var(--hf-radius-lg); overflow: hidden; }
+
+/* Thumbnails de la galería. WooCommerce/flexslider los maquetan con float +
+   width:25% de alta especificidad (y estilos inline), lo que los dejaba
+   diminutos y desalineados. Se fuerza un layout flex propio con !important:
+   4 por fila, tamaño parejo, gap consistente y el MISMO radius que la imagen
+   principal grande (var(--hf-radius-lg)). */
+.hf-product-gallery .flex-control-thumbs {
+	display: flex !important;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin: 0.75rem 0 0 !important;
+	padding: 0 !important;
+	list-style: none;
+	overflow: visible;
+}
+.hf-product-gallery .flex-control-thumbs li {
+	/* 4 por fila: se descuenta el total de los 3 gaps de 0.6rem. */
+	flex: 0 0 calc((100% - 1.8rem) / 4) !important;
+	width: auto !important;
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	float: none !important;
+	list-style: none;
+}
+.hf-product-gallery .flex-control-thumbs img {
+	border-radius: var(--hf-radius-lg) !important;
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+	width: 100% !important;
+	height: auto !important;
+	display: block;
+	cursor: pointer;
+	opacity: 0.55;
+	transition: opacity 0.2s var(--hf-ease);
+}
+.hf-product-gallery .flex-control-thumbs img.flex-active,
+.hf-product-gallery .flex-control-thumbs img:hover {
+	opacity: 1;
+}
 
 .hf-product-title {
 	font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.4rem);
@@ -1466,6 +1998,26 @@ ul.products li.product .star-rating { display: none; }
 	margin: 3rem 0 1.25rem;
 }
 
+/* Ficha de producto en mobile: se compactan los espaciados (venían pensados
+   para desktop y en pantalla chica quedaban demasiado aireados). */
+@media (max-width: 640px) {
+	.hf-product-layout { gap: 1rem; margin-top: 0.75rem; }
+	.hf-product-crumbs { margin-top: 1rem; }
+	.hf-product-title { margin-bottom: 0.35rem; }
+	.hf-product-price { margin-bottom: 0.75rem; }
+	.hf-product-trust { gap: 0.4rem; margin-bottom: 1rem; }
+	.hf-product-cta { padding: 1rem; margin-bottom: 0.75rem; }
+	.hf-product-details { margin-top: 1.75rem; }
+	.hf-nutrition { padding: 1.15rem; margin-bottom: 1.25rem; }
+	.hf-related-heading { margin: 2rem 0 1rem; }
+	/* "También te puede interesar": en mobile juntaba su propio padding
+	   inferior + el margin del grid + el padding-bottom del body (76px para la
+	   barra sticky de compra), dejando demasiado aire antes del footer. */
+	.hf-related-section { padding-top: 0; padding-bottom: 0.5rem; }
+	.hf-related-section .hf-product-grid ul.wc-block-product-template,
+	.hf-related-section .hf-product-grid ul.products { margin-bottom: 0 !important; }
+}
+
 @media (min-width: 900px) {
 	.hf-product-layout {
 		flex-direction: row;
@@ -1515,9 +2067,9 @@ ul.products li.product .star-rating { display: none; }
 
 :root {
 	--hf-fab-size: 56px;
-	--hf-fab-side: 36px;             /* mismo right que el toggler del carrito */
+	--hf-fab-side: 40px;             /* un poco más que el right del toggler (36px) para centrarlo con él */
 	--hf-cart-toggler-size: 60px;    /* asume --fkcart-toggle-size ≈ 30 (default del plugin) */
-	--hf-fab-offset: calc(36px + var(--hf-cart-toggler-size) + 16px); /* bottom del carrito + su alto + separación */
+	--hf-fab-offset: calc(36px + var(--hf-cart-toggler-size) + 22px); /* bottom del carrito + su alto + separación */
 }
 
 .hf-whatsapp-fab {
@@ -1542,11 +2094,22 @@ ul.products li.product .star-rating { display: none; }
 @media (max-width: 640px) {
 	:root {
 		--hf-fab-size: 50px;
-		--hf-fab-side: 20px;
+		--hf-fab-side: 38px;
 		--hf-cart-toggler-size: 54px;
-		--hf-fab-offset: calc(20px + var(--hf-cart-toggler-size) + 14px);
+		--hf-fab-offset: calc(20px + var(--hf-cart-toggler-size) + 26px);
 	}
-	body.hf-product-page-body .hf-whatsapp-fab { bottom: calc(var(--hf-fab-offset) + 76px); }
+}
+
+/* Ocultar los botones flotantes en páginas donde estorban o son redundantes:
+   carrito (ya se ve el carrito completo en pantalla) y checkout/producto
+   (menos distracciones durante la compra). El toggler del carrito es markup
+   del plugin FunnelKit, no del tema — se oculta igual por selector directo. */
+body.hf-cart-page-body .hf-whatsapp-fab,
+body.hf-cart-page-body #fkcart-floating-toggler,
+body.hf-checkout-page-body .hf-whatsapp-fab,
+body.hf-product-page-body .hf-whatsapp-fab,
+body.hf-product-page-body #fkcart-floating-toggler {
+	display: none !important;
 }
 
 /* ==========================================================================
@@ -1554,6 +2117,6 @@ ul.products li.product .star-rating { display: none; }
    ========================================================================== */
 
 @media (max-width: 640px) {
-	.hf-hero__grid { padding-inline: 1.25rem; }
+	.hf-hero-slider__content.hf-container { padding-inline: 1.25rem; }
 	.hf-header__bar { flex-wrap: wrap; }
 }

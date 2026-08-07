@@ -7,6 +7,12 @@ add_filter( 'body_class', function ( $classes ) {
 	if ( function_exists( 'is_product' ) && is_product() ) {
 		$classes[] = 'hf-product-page-body';
 	}
+	if ( function_exists( 'is_cart' ) && is_cart() ) {
+		$classes[] = 'hf-cart-page-body';
+	}
+	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+		$classes[] = 'hf-checkout-page-body';
+	}
 	return $classes;
 } );
 
@@ -42,10 +48,42 @@ add_action( 'wp_enqueue_scripts', function () {
 	$logo_url = esc_url( get_template_directory_uri() . '/assets/images/logo.png' );
 	wp_add_inline_style( 'homefood-style', ":root{--hf-logo-url:url('{$logo_url}');}" );
 
+	// Mismo criterio que el logo: las fotos del home se referencian por PHP para
+	// ser portables entre el staging (subcarpeta /homefood/) y producción (raíz).
+	$images_uri  = get_template_directory_uri() . '/assets/images/';
+	$home_images = [
+		'--hf-img-hero'             => 'hero-generico.webp',
+		'--hf-img-hero-fitness'     => 'hero-fitness.webp',
+		'--hf-img-hero-keto'        => 'hero-keto.webp',
+		'--hf-img-hero-vegetariano' => 'hero-vegetariano.webp',
+		'--hf-img-cat-clasicos'   => 'cat-clasicos.webp',
+		'--hf-img-cat-combos'     => 'cat-combos.webp',
+		'--hf-img-cat-fitness'    => 'cat-fitness.webp',
+		'--hf-img-cat-keto'       => 'cat-keto.webp',
+		'--hf-img-cat-ensaladas'  => 'cat-ensaladas.webp',
+		'--hf-img-cat-emp-pizza'  => 'cat-emp-pizza.webp',
+		'--hf-img-cat-vegetariano' => 'cat-vegetariano.webp',
+		'--hf-img-bg-cta-whatsapp' => 'bg-cta-whatsapp.webp',
+		'--hf-img-journey-elegi'    => 'journey-elegi.webp',
+		'--hf-img-journey-completa' => 'journey-completa.webp',
+		'--hf-img-journey-agenda'   => 'journey-agenda.webp',
+		'--hf-img-journey-recibi'   => 'journey-recibi.webp',
+		'--hf-img-journey-disfruta' => 'journey-disfruta.webp',
+	];
+	$home_images_css = ':root{';
+	foreach ( $home_images as $var => $file ) {
+		$home_images_css .= "{$var}:url('" . esc_url( $images_uri . $file ) . "');";
+	}
+	$home_images_css .= '}';
+	wp_add_inline_style( 'homefood-style', $home_images_css );
+
+	// Depende de wp-data: en carrito/checkout el widget lee el data store de
+	// WooCommerce Blocks (wc/store/cart) como fuente de verdad. wp-data debe
+	// existir antes de que corra nuestro script.
 	wp_enqueue_script(
 		'homefood-order-progress',
 		get_template_directory_uri() . '/assets/js/order-progress.js',
-		[],
+		[ 'wp-data' ],
 		filemtime( get_template_directory() . '/assets/js/order-progress.js' ),
 		true
 	);
@@ -61,6 +99,14 @@ add_action( 'wp_enqueue_scripts', function () {
 		get_template_directory_uri() . '/assets/js/testimonial-carousel.js',
 		[],
 		filemtime( get_template_directory() . '/assets/js/testimonial-carousel.js' ),
+		true
+	);
+
+	wp_enqueue_script(
+		'homefood-product-carousel',
+		get_template_directory_uri() . '/assets/js/product-carousel.js',
+		[],
+		filemtime( get_template_directory() . '/assets/js/product-carousel.js' ),
 		true
 	);
 
@@ -112,6 +158,34 @@ add_action( 'wp_enqueue_scripts', function () {
 		filemtime( get_template_directory() . '/assets/js/quantity-stepper.js' ),
 		true
 	);
+
+	// GSAP + ScrollTrigger auto-hospedados (sin CDN externo, mismo criterio que
+	// el resto del tema) — solo en el home, que es la única plantilla con hero
+	// slider, scroll-reveal y el "paso a paso" animado. No agrega peso al resto
+	// del sitio (carrito, checkout, fichas de producto).
+	if ( function_exists( 'is_front_page' ) && is_front_page() ) {
+		wp_enqueue_script(
+			'gsap',
+			get_template_directory_uri() . '/assets/js/vendor/gsap/gsap.min.js',
+			[],
+			filemtime( get_template_directory() . '/assets/js/vendor/gsap/gsap.min.js' ),
+			true
+		);
+		wp_enqueue_script(
+			'gsap-scrolltrigger',
+			get_template_directory_uri() . '/assets/js/vendor/gsap/ScrollTrigger.min.js',
+			[ 'gsap' ],
+			filemtime( get_template_directory() . '/assets/js/vendor/gsap/ScrollTrigger.min.js' ),
+			true
+		);
+		wp_enqueue_script(
+			'homefood-home-motion',
+			get_template_directory_uri() . '/assets/js/home-motion.js',
+			[ 'gsap', 'gsap-scrolltrigger' ],
+			filemtime( get_template_directory() . '/assets/js/home-motion.js' ),
+			true
+		);
+	}
 } );
 
 /**
@@ -142,6 +216,54 @@ add_filter( 'render_block', function ( $block_content ) {
 		return $block_content;
 	}
 	return str_replace( '[[related-products]]', homefood_related_products_html(), $block_content );
+}, 10, 1 );
+
+/**
+ * "Los platos que todos repiten" (home) pasó de una grilla estática a un carrusel
+ * horizontal (autoplay + flechas + puntos, 4 tarjetas visibles en desktop). Se arma
+ * con el shortcode clásico [best_selling_products] — el mismo motor de WooCommerce
+ * que ya usan las cards de "relacionados" (ver homefood_related_products_html) — y
+ * se le suma la clase de track del carrusel al <ul class="products"> que devuelve,
+ * para no reimplementar el loop de productos a mano. Mismo mecanismo de tokens que
+ * [[related-products]] / [[icon:...]].
+ */
+function homefood_bestsellers_carousel_html() {
+	if ( ! shortcode_exists( 'best_selling_products' ) ) {
+		return '';
+	}
+
+	$grid = do_shortcode( '[best_selling_products limit="12" columns="4"]' );
+	if ( empty( $grid ) ) {
+		return '';
+	}
+
+	$grid = preg_replace( '/<ul class="products([^"]*)"/', '<ul class="hf-product-carousel__track products$1"', $grid, 1 );
+
+	ob_start();
+	?>
+	<div class="hf-product-carousel hf-reveal" data-hf-product-carousel>
+		<div class="hf-product-carousel__viewport">
+			<?php echo $grid; ?>
+		</div>
+		<div class="hf-carousel__controls">
+			<button type="button" class="hf-carousel__arrow" data-hf-product-carousel-prev aria-label="Ver productos anteriores">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+			</button>
+			<div class="hf-carousel__dots" data-hf-product-carousel-dots></div>
+			<button type="button" class="hf-carousel__arrow" data-hf-product-carousel-next aria-label="Ver más productos">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+			</button>
+		</div>
+	</div>
+	<?php
+	return ob_get_clean();
+}
+
+add_filter( 'render_block', function ( $block_content ) {
+	if ( is_admin() || empty( $block_content ) || strpos( $block_content, '[[bestsellers-carousel]]' ) === false ) {
+		return $block_content;
+	}
+	return str_replace( '[[bestsellers-carousel]]', homefood_bestsellers_carousel_html(), $block_content );
 }, 10, 1 );
 
 /**
@@ -191,6 +313,10 @@ function homefood_icon_svg( $name ) {
 		'flame'     => '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
 		'pizza'     => '<path d="M15 11h.01"/><path d="M11 15h.01"/><path d="M16 16h.01"/><path d="m2 16 20 6-6-20A20 20 0 0 0 2 16"/><path d="M5.71 17.11a17.04 17.04 0 0 1 11.4-11.4"/>',
 		'soup'      => '<path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M7 12V7a2 2 0 0 1 2-2h1v2"/><path d="M12 5V3"/><path d="M17 5v2"/>',
+		'basket'    => '<path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>',
+		'calendar'  => '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h20"/>',
+		'snowflake' => '<line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/>',
+		'microwave' => '<rect width="20" height="15" x="2" y="4" rx="2"/><rect width="8" height="7" x="6" y="8" rx="1"/><path d="M18 8v7"/><path d="M6 19v2"/><path d="M18 19v2"/>',
 	];
 
 	if ( ! isset( $icons[ $name ] ) ) {
@@ -201,14 +327,25 @@ function homefood_icon_svg( $name ) {
 }
 
 add_filter( 'render_block', function ( $block_content ) {
-	if ( is_admin() || empty( $block_content ) || strpos( $block_content, '[[icon:' ) === false ) {
+	if ( is_admin() || empty( $block_content ) || strpos( $block_content, '[[' ) === false ) {
 		return $block_content;
 	}
 
-	return preg_replace_callback(
+	$block_content = preg_replace_callback(
 		'/\[\[icon:([a-z-]+)\]\]/',
 		function ( $matches ) {
 			return homefood_icon_svg( $matches[1] );
+		},
+		$block_content
+	);
+
+	// [[img:archivo.ext]] → URL absoluta dentro de assets/images del tema. Mismo
+	// criterio que el logo: la ruta se resuelve por PHP para ser portable entre
+	// el staging (subcarpeta /homefood/) y producción (dominio raíz).
+	return preg_replace_callback(
+		'/\[\[img:([a-z0-9._\-]+)\]\]/',
+		function ( $matches ) {
+			return esc_url( get_template_directory_uri() . '/assets/images/' . $matches[1] );
 		},
 		$block_content
 	);

@@ -77,12 +77,16 @@
 		addToCartWrap.parentNode.insertBefore( actions, addToCartWrap );
 		actions.appendChild( addToCartWrap );
 
-		// "Añadir al carrito" es muy largo para una card angosta con 2 botones.
-		// Se acorta a "Añadir" (el add-to-cart AJAX usa data-attributes, no el
-		// texto, así que sigue funcionando). Solo aplica al markup clásico donde
-		// el label es texto directo del anchor.
-		var addBtn = actions.querySelector( 'a.add_to_cart_button' );
-		if ( addBtn && /añadir al carrito/i.test( addBtn.textContent ) ) {
+		// "Añadir al carrito" (o el nombre completo del producto que agrega el
+		// markup de Blocks, ej. "Añadir «Pastel de papas» al carrito") es muy
+		// largo para una card angosta con 2 botones y se desborda. Se acorta a
+		// "Añadir" en cualquier variante de markup (clásico o Blocks) — el
+		// add-to-cart AJAX usa data-attributes, no el texto, así que sigue
+		// funcionando igual.
+		var addBtn = actions.querySelector(
+			'a.add_to_cart_button, .wc-block-components-product-button__button'
+		);
+		if ( addBtn && /carrito/i.test( addBtn.textContent ) ) {
 			addBtn.textContent = 'Añadir';
 		}
 
@@ -98,6 +102,34 @@
 	}
 
 	document.addEventListener( 'DOMContentLoaded', scan );
+
+	// Feedback de "Añadido" en el propio botón en vez del link "Ver carrito"
+	// que WooCommerce inserta y que ocultamos por CSS (ver style.css) — evita
+	// que la card cambie de alto en cada click mientras se arma el pedido.
+	var FEEDBACK_TEXT = '✓ Añadido';
+	var FEEDBACK_MS = 1600;
+
+	function showAddedFeedback( button ) {
+		if ( ! button ) return;
+		if ( ! button.dataset.hfOriginalText ) {
+			button.dataset.hfOriginalText = button.textContent;
+		}
+		clearTimeout( Number( button.dataset.hfFeedbackTimer ) || 0 );
+		button.textContent = FEEDBACK_TEXT;
+		var timer = setTimeout( function () {
+			button.textContent = button.dataset.hfOriginalText;
+		}, FEEDBACK_MS );
+		button.dataset.hfFeedbackTimer = String( timer );
+	}
+
+	if ( window.jQuery ) {
+		window.jQuery( document.body ).on( 'added_to_cart', function ( event, fragments, cartHash, $button ) {
+			var button = $button && $button.length ? $button[ 0 ] : null;
+			if ( button && button.closest( '.hf-card-actions' ) ) {
+				showAddedFeedback( button );
+			}
+		} );
+	}
 
 	var scanTimer = null;
 	var observer = new MutationObserver( function () {
