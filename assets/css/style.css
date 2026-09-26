@@ -289,6 +289,25 @@ main.wp-block-group {
 .hf-header__nav a:hover::after { transform: scaleX(1); transform-origin: left; }
 
 .hf-header__actions { display: flex; align-items: center; gap: 0.75rem; }
+
+/* Desktop: grilla de 3 columnas con laterales iguales para que el menú quede
+   centrado en la barra. Con space-between se centraba entre logo y acciones, y
+   se corría hacia el logo cuando la pill de progreso estaba oculta (solo carrito). */
+@media (min-width: 901px) {
+	.hf-header__bar {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+	}
+	.hf-header__actions { justify-self: end; }
+	/* Si en anchos justos no entra, que crezca la columna en vez de partir el texto */
+	.hf-progress-mini,
+	.hf-header__nav a { white-space: nowrap; }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+	.hf-header__bar { gap: 1rem; }
+	.hf-header__nav ul { gap: 1.1rem; }
+}
+
 @media (max-width: 420px) {
 	.hf-header__actions { gap: 0.5rem; }
 	/* Con logo + carrito + hamburguesa ya no entra cómodo el indicador de progreso */
