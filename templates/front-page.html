@@ -7,6 +7,10 @@
 <section class="hf-hero-slider hf-full-bleed alignfull" data-hf-hero-slider aria-roledescription="carousel" aria-label="Presentación de Homefood">
 	<h1 class="hf-visually-hidden">Homefood — viandas caseras a domicilio en CABA, Zona Norte y Zona Oeste</h1>
 
+	<!-- Video de fondo solo para escritorio: sin src en el markup para que mobile no lo
+	     descargue nunca; hero-video.js le carga las fuentes si el viewport es >900px. -->
+	<video class="hf-hero-slider__video" data-hf-hero-video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+
 	<div class="hf-hero-slider__slides">
 		<article class="hf-hero-slider__slide is-active" data-hf-hero-slide style="--hf-slide-bg: var(--hf-img-hero)">
 			<div class="hf-hero-slider__bg" data-hf-hero-slide-bg></div>
@@ -139,7 +143,7 @@
 			</div>
 			<div class="hf-journey__content">
 				<h3>Agendá</h3>
-				<p>Elegí el día y la franja horaria que mejor te quede: 11 a 14 hs sin cargo, o 18 a 21 hs con envío.</p>
+				<p>Si recibís tus viandas en la franja horaria de 11 a 14 hs, el costo de envío es de $8.000. Si preferís recibirlas entre las 18 y las 21 hs, el costo de envío es de $20.000. Pero si superás los $120.000, el envío es sin cargo.</p>
 			</div>
 		</div>
 
@@ -224,18 +228,25 @@
 	</div>
 
 	<div class="hf-shipping-costs hf-reveal">
-		<div class="hf-cost-card hf-cost-card--free">
+		<div class="hf-cost-card hf-cost-card--morning">
 			<span class="hf-cost-card__icon">[[icon:sunrise]]</span>
 			<div>
 				<span class="hf-cost-card__label">11 a 14 hs</span>
-				<span class="hf-cost-card__amount">Envío sin cargo</span>
+				<span class="hf-cost-card__amount">$8.000 de envío</span>
 			</div>
 		</div>
 		<div class="hf-cost-card hf-cost-card--evening">
 			<span class="hf-cost-card__icon">[[icon:sunset]]</span>
 			<div>
 				<span class="hf-cost-card__label">18 a 21 hs</span>
-				<span class="hf-cost-card__amount">$15.000 de envío</span>
+				<span class="hf-cost-card__amount">$20.000 de envío</span>
+			</div>
+		</div>
+		<div class="hf-cost-card hf-cost-card--free">
+			<span class="hf-cost-card__icon">[[icon:gift]]</span>
+			<div>
+				<span class="hf-cost-card__label">Pedidos desde $120.000</span>
+				<span class="hf-cost-card__amount">Envío sin cargo</span>
 			</div>
 		</div>
 	</div>

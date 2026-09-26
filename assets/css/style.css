@@ -436,6 +436,24 @@ body.hf-no-scroll { overflow: hidden; }
 
 .hf-hero-slider__slides { position: relative; height: 100%; }
 
+/* Video de fondo (solo escritorio, ver hero-video.js): queda debajo de los slides,
+   que siguen rotando los textos con su scrim. Las fotos de cada slide se ocultan
+   recién cuando el video está reproduciendo (.has-video) — si el video no carga,
+   el slider sigue mostrando las fotos como antes. En mobile no se muestra ni se
+   descarga. */
+.hf-hero-slider__video {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: none;
+}
+@media (min-width: 901px) {
+	.hf-hero-slider__video { display: block; }
+	.hf-hero-slider.has-video .hf-hero-slider__bg { visibility: hidden; }
+}
+
 .hf-hero-slider__slide {
 	position: absolute;
 	inset: 0;
@@ -1345,7 +1363,7 @@ ul.products li.product .star-rating { display: none; }
 
 .hf-shipping-costs {
 	display: grid;
-	grid-template-columns: repeat(2, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 1.25rem;
 }
 .hf-cost-card {
@@ -1373,8 +1391,12 @@ ul.products li.product .star-rating { display: none; }
 	color: var(--wp--preset--color--primary-dark);
 	margin-top: 0.15rem;
 }
-.hf-cost-card--free { border-left: 4px solid var(--wp--preset--color--accent); }
+.hf-cost-card--morning { border-left: 4px solid var(--wp--preset--color--accent); }
 .hf-cost-card--evening { border-left: 4px solid #e0a83c; }
+.hf-cost-card--free {
+	border-left: 4px solid var(--wp--preset--color--primary);
+	background: color-mix(in srgb, var(--wp--preset--color--accent) 10%, #fff);
+}
 
 @media (max-width: 900px) {
 	.hf-zones-layout { grid-template-columns: 1fr; }

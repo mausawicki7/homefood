@@ -178,6 +178,25 @@ add_action( 'wp_enqueue_scripts', function () {
 			filemtime( get_template_directory() . '/assets/js/vendor/gsap/ScrollTrigger.min.js' ),
 			true
 		);
+		// Video del hero: script propio (no depende de GSAP) para que el video
+		// funcione aunque falle la carga de las animaciones.
+		wp_enqueue_script(
+			'homefood-hero-video',
+			get_template_directory_uri() . '/assets/js/hero-video.js',
+			[],
+			filemtime( get_template_directory() . '/assets/js/hero-video.js' ),
+			true
+		);
+		$video_uri = get_template_directory_uri() . '/assets/video/';
+		wp_add_inline_script(
+			'homefood-hero-video',
+			'window.hfHeroVideo = ' . wp_json_encode( [
+				'webm'   => $video_uri . 'hero-desktop.webm',
+				'mp4'    => $video_uri . 'hero-desktop.mp4',
+				'poster' => get_template_directory_uri() . '/assets/images/hero-video-poster.webp',
+			] ) . ';',
+			'before'
+		);
 		wp_enqueue_script(
 			'homefood-home-motion',
 			get_template_directory_uri() . '/assets/js/home-motion.js',
@@ -350,6 +369,30 @@ add_filter( 'render_block', function ( $block_content ) {
 		$block_content
 	);
 }, 10, 1 );
+
+/**
+ * Envío sin cargo desde $120.000, en las dos franjas. Las zonas de WooCommerce tienen
+ * un flat_rate por franja (11 a 14 hs $8.000 / 18 a 21 hs $20.000 — ver
+ * _update_shipping.js en la raíz del proyecto), y WooCommerce no puede condicionar un
+ * flat_rate al monto del pedido, así que se pone en $0 acá. Se mide contra
+ * contents_cost (subtotal después de cupones), igual que el free_shipping nativo.
+ * Si cambia el umbral, actualizar también el paso 3 de "Tu pedido, paso a paso" y las
+ * tarjetas de costos de envío en templates/front-page.html.
+ */
+define( 'HOMEFOOD_FREE_SHIPPING_MIN', 120000 );
+
+add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
+	if ( ( $package['contents_cost'] ?? 0 ) < HOMEFOOD_FREE_SHIPPING_MIN ) {
+		return $rates;
+	}
+	foreach ( $rates as $rate ) {
+		if ( 'flat_rate' === $rate->get_method_id() ) {
+			$rate->set_cost( 0 );
+			$rate->set_taxes( array() );
+		}
+	}
+	return $rates;
+}, 10, 2 );
 
 /**
  * Botón flotante de WhatsApp nativo del tema — reemplaza al plugin "Click to Chat".
