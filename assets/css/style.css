@@ -736,6 +736,45 @@ body.hf-no-scroll { overflow: hidden; }
 	color: #fff;
 }
 
+/* Paginación del catálogo: mismo lenguaje que las pills de categoría. Sin esto
+   /viandas/ mostraba solo la primera página (16 de 169) sin forma de avanzar. */
+.hf-pagination {
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 2.5rem 0 1rem;
+}
+.hf-pagination .page-numbers,
+.hf-pagination .wp-block-query-pagination-previous,
+.hf-pagination .wp-block-query-pagination-next {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.6rem;
+	min-height: 2.6rem;
+	padding: 0 0.9rem;
+	border-radius: 999px;
+	border: 1px solid rgba(29,29,27,0.14);
+	background: #fff;
+	color: var(--wp--preset--color--ink);
+	text-decoration: none;
+	font-size: 0.9rem;
+	font-weight: 600;
+	transition: background 0.2s var(--hf-ease), color 0.2s var(--hf-ease), border-color 0.2s var(--hf-ease);
+}
+.hf-pagination .wp-block-query-pagination-numbers {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.5rem;
+}
+.hf-pagination a:hover { border-color: var(--wp--preset--color--accent); color: var(--wp--preset--color--primary-dark); }
+.hf-pagination .page-numbers.current {
+	background: var(--wp--preset--color--primary);
+	border-color: var(--wp--preset--color--primary);
+	color: #fff;
+}
+.hf-pagination .page-numbers.dots { border-color: transparent; background: none; min-width: auto; padding: 0 0.25rem; }
+
 /* ==========================================================================
    Grillas de producto (funciona sobre bloques WooCommerce nativos)
    ========================================================================== */
