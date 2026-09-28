@@ -371,25 +371,42 @@ add_filter( 'render_block', function ( $block_content ) {
 }, 10, 1 );
 
 /**
- * Envío sin cargo desde $120.000, en las dos franjas. Las zonas de WooCommerce tienen
- * un flat_rate por franja (11 a 14 hs $8.000 / 18 a 21 hs $20.000 — ver
- * _update_shipping.js en la raíz del proyecto), y WooCommerce no puede condicionar un
- * flat_rate al monto del pedido, así que se pone en $0 acá. Se mide contra
- * contents_cost (subtotal después de cupones), igual que el free_shipping nativo.
- * Si cambia el umbral, actualizar también el paso 3 de "Tu pedido, paso a paso" y las
- * tarjetas de costos de envío en templates/front-page.html.
+ * Costo de envío según franja y monto del pedido:
+ *   11 a 15 hs → $8.000; sin cargo si el pedido supera los $200.000.
+ *   18 a 21 hs → $20.000; $10.000 si el pedido es de $300.000 o más.
+ * Las zonas de WooCommerce tienen un flat_rate por franja con el costo base ($8.000 /
+ * $20.000) y WooCommerce no puede condicionar un flat_rate al monto del pedido, así que
+ * el descuento se aplica acá. La franja se reconoce por la hora de inicio en el nombre
+ * del método ("Envío (despacho en 48 hs – lunes a viernes de 11 a 15 hs)"). Se mide
+ * contra contents_cost (subtotal después de cupones), igual que el free_shipping nativo.
+ * Si cambian montos o franjas, actualizar también el paso 3 de "Tu pedido, paso a paso"
+ * y las tarjetas de costos de envío en templates/front-page.html.
  */
-define( 'HOMEFOOD_FREE_SHIPPING_MIN', 120000 );
-
 add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
-	if ( ( $package['contents_cost'] ?? 0 ) < HOMEFOOD_FREE_SHIPPING_MIN ) {
-		return $rates;
-	}
+	$subtotal = (float) ( $package['contents_cost'] ?? 0 );
+
 	foreach ( $rates as $rate ) {
-		if ( 'flat_rate' === $rate->get_method_id() ) {
-			$rate->set_cost( 0 );
-			$rate->set_taxes( array() );
+		if ( 'flat_rate' !== $rate->get_method_id() || ! preg_match( '/\bde (\d{1,2}) a \d{1,2} hs\b/', $rate->get_label(), $m ) ) {
+			continue;
 		}
+
+		$start = (int) $m[1];
+		if ( 11 === $start && $subtotal > 200000 ) {
+			$cost = 0;
+		} elseif ( 18 === $start && $subtotal >= 300000 ) {
+			$cost = 10000;
+		} else {
+			continue;
+		}
+
+		// Impuestos proporcionales al nuevo costo (hoy el envío no lleva, pero si se
+		// configuran no quedan desfasados del costo).
+		$old_cost = (float) $rate->get_cost();
+		$ratio    = $old_cost > 0 ? $cost / $old_cost : 0;
+		$rate->set_cost( $cost );
+		$rate->set_taxes( array_map( function ( $tax ) use ( $ratio ) {
+			return $tax * $ratio;
+		}, $rate->get_taxes() ) );
 	}
 	return $rates;
 }, 10, 2 );

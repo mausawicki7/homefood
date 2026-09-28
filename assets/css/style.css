@@ -1421,7 +1421,7 @@ ul.products li.product .star-rating { display: none; }
 
 .hf-shipping-costs {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(2, 1fr);
 	gap: 1.25rem;
 }
 .hf-cost-card {
@@ -1451,9 +1451,13 @@ ul.products li.product .star-rating { display: none; }
 }
 .hf-cost-card--morning { border-left: 4px solid var(--wp--preset--color--accent); }
 .hf-cost-card--evening { border-left: 4px solid #e0a83c; }
-.hf-cost-card--free {
-	border-left: 4px solid var(--wp--preset--color--primary);
-	background: color-mix(in srgb, var(--wp--preset--color--accent) 10%, #fff);
+/* Descuento por monto de la franja: la tarifa base es el dato principal, esto la matiza. */
+.hf-cost-card__note {
+	display: block;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--primary);
+	margin-top: 0.35rem;
 }
 
 @media (max-width: 900px) {
