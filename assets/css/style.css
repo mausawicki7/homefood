@@ -642,24 +642,46 @@ body.hf-no-scroll { overflow: hidden; }
 .hf-hero-slider__dot.is-active { background: #fff; transform: scale(1.25); }
 
 @media (max-width: 900px) {
-	/* En mobile las badges dejan de flotar como overlay absoluto (con textos
-	   largos se superponían con el lead/los botones) y pasan al flujo normal,
-	   debajo de los botones — alineadas a la izquierda, igual que "Ver el
-	   catálogo"/"¿Cómo funciona?", en vez de centradas. */
-	.hf-hero-slider__badges {
-		position: static;
-		justify-content: flex-start;
-		padding-inline: 0;
-		margin-top: 1.25rem;
-		gap: 0.5rem;
-	}
-	.hf-hero-slider__badges .hf-badge { font-size: 0.72rem; padding: 0.4rem 0.75rem; }
+	/* En mobile las badges no se muestran: como overlay absoluto se superponían
+	   con el lead/los botones, y en el flujo quedan debajo de los slides, pisadas
+	   por las flechas. Antes quedaban recortadas por el overflow del hero con
+	   alto fijo; ahora que el hero crece con el contenido, se ocultan explícito. */
+	.hf-hero-slider__badges { display: none; }
 	/* Ya no hay que reservar aire para una barra de badges absoluta — solo
-	   para los controles (flechas/dots), que siguen anclados abajo. */
-	.hf-hero-slider__content { padding-bottom: clamp(3.5rem, 10vh, 5rem); }
+	   para los controles (flechas/dots), que siguen anclados abajo: 44px de
+	   flecha + 18px de margen inferior + aire, así los botones no los tocan. */
+	.hf-hero-slider__content { padding-bottom: 5.5rem; }
+
+	/* Con alto fijo, en celulares angostos el slide 1 (eyebrow en dos líneas +
+	   lead largo) no entraba y, como el contenido está centrado verticalmente,
+	   el sobrante salía por arriba y el eyebrow quedaba debajo de la navbar.
+	   Acá los slides se apilan en la misma celda de grid en vez de ir en
+	   absoluto: el hero crece hasta el slide más alto y nunca desborda. El alto
+	   mínimo es el mismo de antes (90svh acotado entre min-height y 880px). */
+	.hf-hero-slider {
+		height: auto;
+		max-height: none;
+	}
+	.hf-hero-slider__slides {
+		display: grid;
+		height: auto;
+		min-height: clamp(560px, 90svh, 880px);
+	}
+	.hf-hero-slider__slide {
+		position: relative;
+		inset: auto;
+		grid-area: 1 / 1;
+		display: flex;
+	}
+	.hf-hero-slider__content {
+		flex: 1;
+		height: auto;
+		padding-top: 2.5rem;
+	}
 }
 @media (max-width: 480px) {
 	.hf-hero-slider { min-height: 640px; }
+	.hf-hero-slider__slides { min-height: clamp(640px, 90svh, 880px); }
 }
 
 /* ==========================================================================
@@ -2194,6 +2216,26 @@ body.hf-checkout-page-body .hf-whatsapp-fab,
 body.hf-product-page-body .hf-whatsapp-fab,
 body.hf-product-page-body #fkcart-floating-toggler {
 	display: none !important;
+}
+
+/* ==========================================================================
+   Checkout — notas del pedido (ver assets/js/checkout-order-notes.js)
+   ========================================================================== */
+
+/* La casilla "Añadir una nota a tu pedido" queda oculta: el script la marca
+   al cargar para que el cuadro de texto esté siempre abierto. */
+.wc-block-checkout__order-notes .wc-block-checkout__add-note .wc-block-components-checkbox {
+	display: none;
+}
+.wc-block-checkout__order-notes .wc-block-components-textarea {
+	margin-top: 0;
+	min-height: 6.5em;
+}
+.hf-order-notes__hint {
+	margin: 0.25rem 0 1rem;
+	font-size: 0.9rem;
+	line-height: 1.55;
+	color: var(--wp--preset--color--muted);
 }
 
 /* ==========================================================================

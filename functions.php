@@ -138,6 +138,17 @@ add_action( 'wp_enqueue_scripts', function () {
 		);
 	}
 
+	// Notas del pedido siempre abiertas, con título y texto de ayuda (ver el script).
+	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+		wp_enqueue_script(
+			'homefood-checkout-order-notes',
+			get_template_directory_uri() . '/assets/js/checkout-order-notes.js',
+			[],
+			filemtime( get_template_directory() . '/assets/js/checkout-order-notes.js' ),
+			true
+		);
+	}
+
 	// Rediseño de las cards de producto: agrega tagline por categoría y arma la
 	// fila de 2 acciones (Añadir + Ver producto) sin romper el add-to-cart AJAX.
 	wp_enqueue_script(
