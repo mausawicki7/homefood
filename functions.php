@@ -429,7 +429,7 @@ add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
  * botón flotante del carrito (círculo, sombra, hover), un nivel arriba en la pila.
  */
 add_action( 'wp_footer', function () {
-	$phone = '5491161301150'; // +54 9 11 6130-1150
+	$phone = '5491128368779'; // +54 9 11 2836-8779
 	$url   = 'https://wa.me/' . $phone;
 	?>
 	<a
