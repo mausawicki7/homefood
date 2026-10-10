@@ -2239,6 +2239,34 @@ body.hf-product-page-body #fkcart-floating-toggler {
 }
 
 /* ==========================================================================
+   Checkout — dirección de entrega (ver inc/checkout.php y
+   assets/js/checkout-address.js)
+   ========================================================================== */
+
+/* Solo se vende en Argentina: el desplegable de país tiene una única opción y
+   el valor lo fija el servidor, así que no hace falta mostrarlo. */
+.wc-block-components-address-form .wc-block-components-address-form__country {
+	display: none;
+}
+
+/* Aviso cuando el código postal es válido pero no hay reparto en esa zona. */
+.hf-no-coverage {
+	margin-top: 1rem;
+	padding: 0.875rem 1rem;
+	border-radius: 12px;
+	border: 1px solid #f0c36d;
+	background: #fff8e6;
+	color: #5c4400;
+	font-size: 0.9rem;
+	line-height: 1.55;
+}
+.hf-no-coverage a {
+	color: inherit;
+	font-weight: 600;
+	text-decoration: underline;
+}
+
+/* ==========================================================================
    Utilidades responsive generales
    ========================================================================== */
 
