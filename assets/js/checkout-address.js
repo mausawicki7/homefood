@@ -5,8 +5,12 @@
 	// lo que escribe el cliente o trae el autocompletado del navegador, para que no
 	// se quede sin opciones de envío (la regla de fondo está en inc/checkout.php):
 	//   - país siempre AR (el campo está oculto por CSS);
-	//   - código postal a 4 números ("B1636FDA" → "1636");
-	//   - provincia según el código postal (1000 a 1499 es CABA, el resto GBA).
+	//   - código postal con la letra de la provincia adelante ("1636" o "B1636FDA"
+	//     → "B1636"; 1000 a 1499 es CABA, el resto GBA);
+	//   - provincia según el código postal.
+	// La letra no es estética: con país AR, el validador de WooCommerce en el
+	// navegador solo acepta letra + 4 números y rechaza "1636" a secas. El servidor
+	// la saca y guarda los 4 números, que es como están cargadas las zonas de envío.
 	// Si el código postal es válido pero no hay reparto, avisa por qué.
 	// Todo pasa por el data store de WooCommerce Blocks (wc/store/cart): los campos
 	// son de React y pisar el value del input a mano no actualiza el pedido.
@@ -25,14 +29,14 @@
 	// cuando cambia el código postal, no cada vez que el cliente toca el desplegable.
 	var lastPostcode = {};
 
-	function cleanPostcode( value ) {
-		var digits = String( value || '' ).match( /\d{4}/ );
-		// Mientras se está escribiendo ("B16") no hay 4 números todavía: no se toca.
-		return digits && /\D/.test( value ) ? digits[ 0 ] : value;
+	// Los 4 números del código postal, o '' si todavía no está completo ("B16").
+	function postcodeDigits( value ) {
+		var match = String( value || '' ).toUpperCase().match( /^\s*[A-Z]?\s?(\d{4})\s?[A-Z]{0,3}\s*$/ );
+		return match ? match[ 1 ] : '';
 	}
 
-	function stateFor( postcode ) {
-		var n = parseInt( postcode, 10 );
+	function stateFor( digits ) {
+		var n = parseInt( digits, 10 );
 		return n >= 1000 && n <= 1499 ? 'C' : 'B';
 	}
 
@@ -53,14 +57,17 @@
 			if ( ! address.country ) {
 				patch.country = 'AR';
 			}
-			var postcode = cleanPostcode( address.postcode );
-			if ( postcode !== address.postcode ) {
-				patch.postcode = postcode;
-			}
-			if ( /^\d{4}$/.test( postcode ) && postcode !== lastPostcode[ type.key ] ) {
-				lastPostcode[ type.key ] = postcode;
-				if ( address.state !== stateFor( postcode ) ) {
-					patch.state = stateFor( postcode );
+			var digits = postcodeDigits( address.postcode );
+			if ( digits ) {
+				// La letra del código postal argentino es el código de la provincia.
+				if ( address.postcode !== stateFor( digits ) + digits ) {
+					patch.postcode = stateFor( digits ) + digits;
+				}
+				if ( digits !== lastPostcode[ type.key ] ) {
+					lastPostcode[ type.key ] = digits;
+					if ( address.state !== stateFor( digits ) ) {
+						patch.state = stateFor( digits );
+					}
 				}
 			}
 			if ( Object.keys( patch ).length ) {
@@ -88,9 +95,9 @@
 		}
 		var notice = step.querySelector( '.hf-no-coverage' );
 		var cart = select.getCartData() || {};
-		var postcode = ( cart.shippingAddress || {} ).postcode || '';
+		var postcode = postcodeDigits( ( cart.shippingAddress || {} ).postcode );
 		var updating = typeof select.isCustomerDataUpdating === 'function' && select.isCustomerDataUpdating();
-		var show = /^\d{4}$/.test( postcode ) && ! hasRates( cart ) && ! updating;
+		var show = postcode && ! hasRates( cart ) && ! updating;
 
 		if ( ! show ) {
 			if ( notice ) {
