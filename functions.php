@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require get_template_directory() . '/inc/checkout.php';
+
 add_filter( 'body_class', function ( $classes ) {
 	if ( function_exists( 'is_product' ) && is_product() ) {
 		$classes[] = 'hf-product-page-body';
