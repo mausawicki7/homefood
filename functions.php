@@ -120,6 +120,20 @@ add_action( 'wp_enqueue_scripts', function () {
 		true
 	);
 
+	wp_enqueue_script(
+		'homefood-header-search',
+		get_template_directory_uri() . '/assets/js/header-search.js',
+		[],
+		filemtime( get_template_directory() . '/assets/js/header-search.js' ),
+		true
+	);
+
+	wp_localize_script( 'homefood-header-search', 'homefoodSearch', [
+		'storeApiUrl' => esc_url_raw( home_url( '/wp-json/wc/store/v1/products' ) ),
+		'searchUrl'   => esc_url_raw( home_url( '/' ) ),
+		'shopUrl'     => esc_url_raw( home_url( '/viandas/' ) ),
+	] );
+
 	if ( function_exists( 'is_product' ) && is_product() ) {
 		wp_enqueue_script(
 			'homefood-product-sticky-cta',

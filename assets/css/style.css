@@ -260,6 +260,10 @@ main.wp-block-group {
 @media (max-width: 640px) {
 	.hf-logo { width: 180px; height: 60px; }
 }
+/* Logo + lupa + carrito + menú tienen que entrar en 320px */
+@media (max-width: 400px) {
+	.hf-logo { width: 150px; height: 50px; }
+}
 
 .hf-header__nav ul {
 	display: flex;
@@ -342,6 +346,194 @@ main.wp-block-group {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+/* Buscador: lupa al lado del carrito, mismo botón circular */
+.hf-search-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: var(--wp--preset--color--cream);
+	color: var(--wp--preset--color--primary);
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: background 0.2s var(--hf-ease);
+}
+.hf-search-toggle svg { width: 20px; height: 20px; }
+.hf-search-toggle:hover,
+.hf-search-toggle[aria-expanded="true"] { background: var(--wp--preset--color--accent-soft); }
+.hf-search-toggle:focus-visible,
+.hf-search__close:focus-visible {
+	outline: 2px solid var(--wp--preset--color--accent);
+	outline-offset: 2px;
+}
+
+/* Panel del buscador: cuelga debajo de la barra del header (que es sticky) */
+.hf-search {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background: #fff;
+	border-bottom: 1px solid rgba(29, 29, 27, 0.08);
+	box-shadow: var(--hf-shadow-md);
+	padding-block: 1rem 1.25rem;
+	animation: hf-search-in 0.22s var(--hf-ease);
+}
+.hf-search[hidden] { display: none; }
+/* Es hijo directo del header (layout constrained de FSE), que le pone
+   max-width a sus hijos: el panel va de borde a borde igual que el header. */
+.hf-header .hf-search { max-width: none; margin: 0; }
+@keyframes hf-search-in {
+	from { opacity: 0; transform: translateY(-6px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+.hf-search > .hf-container { max-width: 760px; }
+
+.hf-search__form {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+.hf-search__icon {
+	position: absolute;
+	left: 1rem;
+	width: 20px;
+	height: 20px;
+	color: var(--wp--preset--color--muted);
+	pointer-events: none;
+}
+.hf-search__input {
+	width: 100%;
+	height: 52px;
+	padding: 0 3.25rem 0 3rem;
+	border: 1.5px solid rgba(29, 29, 27, 0.12);
+	border-radius: 999px;
+	background: var(--wp--preset--color--cream);
+	font: inherit;
+	font-size: 1rem; /* 16px: evita el zoom automático de iOS al enfocar */
+	color: var(--wp--preset--color--ink);
+	-webkit-appearance: none;
+	appearance: none;
+}
+.hf-search__input::-webkit-search-cancel-button { display: none; }
+.hf-search__input:focus {
+	outline: none;
+	border-color: var(--wp--preset--color--accent);
+	background: #fff;
+	box-shadow: 0 0 0 4px var(--wp--preset--color--accent-soft);
+}
+.hf-search__close {
+	position: absolute;
+	right: 0.4rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--wp--preset--color--muted);
+	cursor: pointer;
+}
+.hf-search__close:hover { background: rgba(29, 29, 27, 0.06); color: var(--wp--preset--color--ink); }
+.hf-search__close svg { width: 18px; height: 18px; }
+
+/* Mientras busca, la lupa del campo late suave */
+.hf-search.is-loading .hf-search__icon { animation: hf-search-pulse 0.9s ease-in-out infinite; }
+@keyframes hf-search-pulse { 50% { opacity: 0.35; } }
+
+.hf-search__results {
+	list-style: none;
+	margin: 0.75rem 0 0;
+	padding: 0;
+	/* Que entren los 6 platos + "Ver todos" sin scroll en una pantalla normal */
+	max-height: calc(100svh - var(--hf-header-h, 88px) - 7rem);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+.hf-search__results[hidden] { display: none; }
+.hf-search__results a {
+	display: grid;
+	grid-template-columns: 56px 1fr auto;
+	align-items: center;
+	gap: 0.9rem;
+	padding: 0.5rem 0.6rem;
+	border-radius: var(--hf-radius-sm);
+	color: var(--wp--preset--color--ink);
+	text-decoration: none;
+}
+.hf-search__results img,
+.hf-search__thumb-empty {
+	width: 56px;
+	height: 56px;
+	border-radius: var(--hf-radius-sm);
+	object-fit: cover;
+	background: var(--wp--preset--color--cream);
+}
+.hf-search__thumb-empty { display: block; }
+.hf-search__name { font-weight: 500; line-height: 1.3; }
+.hf-search__name mark {
+	background: none;
+	color: var(--wp--preset--color--primary);
+	font-weight: 700;
+}
+.hf-search__price {
+	font-weight: 700;
+	color: var(--wp--preset--color--primary-dark);
+	white-space: nowrap;
+}
+.hf-search__results a:hover,
+.hf-search__results [aria-selected="true"] a { background: var(--wp--preset--color--accent-soft); }
+
+.hf-search__all a {
+	display: block;
+	margin-top: 0.35rem;
+	padding: 0.8rem 0.6rem;
+	border-top: 1px solid rgba(29, 29, 27, 0.08);
+	border-radius: 0;
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--primary);
+}
+.hf-search__all a::after { content: " →"; }
+
+.hf-search__status {
+	margin: 0.75rem 0 0;
+	font-size: 0.9rem;
+	color: var(--wp--preset--color--muted);
+}
+.hf-search__status:empty { display: none; }
+.hf-search__status a { color: var(--wp--preset--color--primary); font-weight: 600; }
+/* Con resultados el conteo solo lo lee el lector de pantalla */
+.hf-search__results:not([hidden]) + .hf-search__status {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+	.hf-search { padding-block: 0.75rem 1rem; }
+	.hf-search__results a { grid-template-columns: 48px 1fr auto; gap: 0.7rem; }
+	.hf-search__results img,
+	.hf-search__thumb-empty { width: 48px; height: 48px; }
+	.hf-search__name { font-size: 0.92rem; }
+	.hf-search__price { font-size: 0.92rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hf-search,
+	.hf-search.is-loading .hf-search__icon { animation: none; }
 }
 
 /* Barra compacta de progreso hacia el mínimo, visible en todo el sitio */
