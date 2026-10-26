@@ -409,15 +409,22 @@ add_filter( 'render_block', function ( $block_content ) {
  * Si cambian montos o franjas, actualizar también el paso 3 de "Tu pedido, paso a paso"
  * y las tarjetas de costos de envío en templates/front-page.html.
  */
+function homefood_rate_start_hour( $rate ) {
+	if ( 'flat_rate' !== $rate->get_method_id() || ! preg_match( '/\bde (\d{1,2}) a \d{1,2} hs\b/', $rate->get_label(), $m ) ) {
+		return null;
+	}
+	return (int) $m[1];
+}
+
 add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
 	$subtotal = (float) ( $package['contents_cost'] ?? 0 );
 
 	foreach ( $rates as $rate ) {
-		if ( 'flat_rate' !== $rate->get_method_id() || ! preg_match( '/\bde (\d{1,2}) a \d{1,2} hs\b/', $rate->get_label(), $m ) ) {
+		$start = homefood_rate_start_hour( $rate );
+		if ( null === $start ) {
 			continue;
 		}
 
-		$start = (int) $m[1];
 		if ( 11 === $start && $subtotal > 200000 ) {
 			$cost = 0;
 		} elseif ( 18 === $start && $subtotal >= 300000 ) {
@@ -436,6 +443,20 @@ add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
 		}, $rate->get_taxes() ) );
 	}
 	return $rates;
+}, 10, 2 );
+
+/**
+ * Envío preseleccionado: la franja de 11 a 15 hs. WooCommerce marca el primer método
+ * de la zona, que era el de 18 a 21. Este filtro solo corre cuando el cliente todavía
+ * no eligió (o su elección dejó de estar disponible), así que no pisa un cambio manual.
+ */
+add_filter( 'woocommerce_shipping_chosen_method', function ( $default, $rates ) {
+	foreach ( $rates as $rate_id => $rate ) {
+		if ( 11 === homefood_rate_start_hour( $rate ) ) {
+			return $rate_id;
+		}
+	}
+	return $default;
 }, 10, 2 );
 
 /**
