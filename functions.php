@@ -404,7 +404,9 @@ add_filter( 'render_block', function ( $block_content ) {
  * Las zonas de WooCommerce tienen un flat_rate por franja con el costo base ($8.000 /
  * $20.000) y WooCommerce no puede condicionar un flat_rate al monto del pedido, así que
  * el descuento se aplica acá. La franja se reconoce por la hora de inicio en el nombre
- * del método ("Envío (despacho en 48 hs – lunes a viernes de 11 a 15 hs)"). Se mide
+ * del método ("Envío (despacho en 48 a 72 hs - lunes a viernes de 11 a 15 hs)"). Ojo: el
+ * plazo tiene que ir como "en 48 a 72 hs" y no como "de 48 a 72 hs", porque si no la regex
+ * lo toma como franja (hora 48) y deja de aplicar el descuento. Se mide
  * contra contents_cost (subtotal después de cupones), igual que el free_shipping nativo.
  * Si cambian montos o franjas, actualizar también el paso 3 de "Tu pedido, paso a paso"
  * y las tarjetas de costos de envío en templates/front-page.html.
