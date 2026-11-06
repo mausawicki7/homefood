@@ -969,6 +969,195 @@ body.hf-no-scroll { overflow: hidden; }
 	color: #fff;
 }
 
+/* ==========================================================================
+   Cross-sell de combos (archivo de productos) — ver homefood_combo_upsell_html()
+   ========================================================================== */
+
+.hf-combo-upsell {
+	display: grid;
+	gap: 1.25rem;
+	margin: 0 0 2.5rem;
+	padding: clamp(1.25rem, 2.5vw, 2rem);
+	border-radius: var(--hf-radius-lg);
+	background: var(--wp--preset--color--accent-soft);
+}
+.hf-combo-upsell__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 0.75rem 1.5rem;
+}
+.hf-combo-upsell__title {
+	margin: 0.3rem 0 0.4rem;
+	font-family: var(--wp--preset--font-family--display);
+	font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem);
+	line-height: 1.1;
+	color: var(--wp--preset--color--primary-dark);
+}
+.hf-combo-upsell__text {
+	margin: 0;
+	max-width: 48ch;
+	color: var(--wp--preset--color--ink);
+}
+.hf-combo-upsell__all {
+	font-weight: 600;
+	color: var(--wp--preset--color--primary);
+	text-decoration: none;
+	white-space: nowrap;
+}
+.hf-combo-upsell__all:hover { text-decoration: underline; }
+.hf-combo-upsell__all:focus-visible,
+.hf-combo-size:focus-visible {
+	outline: 3px solid var(--wp--preset--color--accent);
+	outline-offset: 3px;
+}
+
+.hf-combo-upsell__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Un solo combo (Keto, Clásicas, Vegetariano): texto a la izquierda, card a la derecha. */
+@media (min-width: 901px) {
+	.hf-combo-upsell--single {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+		align-items: center;
+		gap: 2rem;
+	}
+	.hf-combo-upsell--single .hf-combo-upsell__head { align-items: flex-start; flex-direction: column; }
+	.hf-combo-upsell--single .hf-combo-upsell__list { grid-template-columns: 1fr; }
+}
+
+/* Imagen + nombre arriba; los tamaños (7 / 14 viandas) abajo, a todo el ancho de la card. */
+.hf-combo-card {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 0.75rem 1rem;
+	padding: 0.85rem;
+	border-radius: var(--hf-radius-md);
+	background: #fff;
+	box-shadow: var(--hf-shadow-sm);
+}
+.hf-combo-card__media {
+	display: block;
+	width: 80px;
+	aspect-ratio: 1;
+	overflow: hidden;
+	border-radius: var(--hf-radius-sm);
+}
+.hf-combo-card__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.hf-combo-card__body { min-width: 0; }
+.hf-combo-card__name {
+	margin: 0;
+	font-family: var(--wp--preset--font-family--display);
+	font-size: 1.15rem;
+	line-height: 1.2;
+	color: var(--wp--preset--color--primary-dark);
+}
+.hf-combo-card__tagline {
+	margin: 0.15rem 0 0;
+	font-size: 0.875rem;
+	color: var(--wp--preset--color--muted);
+}
+.hf-combo-card__sizes {
+	grid-column: 1 / -1;
+	display: flex;
+	gap: 0.5rem;
+}
+.hf-combo-size {
+	flex: 1 1 0;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	padding: 0.45rem 0.8rem;
+	border: 1.5px solid rgba(30, 108, 79, 0.25);
+	border-radius: var(--hf-radius-sm);
+	color: var(--wp--preset--color--ink);
+	line-height: 1.3;
+	text-decoration: none;
+	transition: border-color 0.2s var(--hf-ease), background 0.2s var(--hf-ease), transform 0.2s var(--hf-ease);
+}
+.hf-combo-size:hover {
+	border-color: var(--wp--preset--color--accent);
+	background: var(--wp--preset--color--accent-soft);
+	transform: translateY(-2px);
+}
+.hf-combo-size__count {
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--primary);
+}
+.hf-combo-size__price { font-weight: 700; font-size: 1.05rem; }
+.hf-combo-size__unit { font-size: 0.78rem; color: var(--wp--preset--color--muted); }
+
+/* Categorías sin combo propio y "Todas": franja corta. */
+.hf-combo-upsell--compact {
+	display: flex;
+	align-items: center;
+	gap: 1rem 1.25rem;
+	padding: 1rem 1.25rem;
+	border-radius: var(--hf-radius-md);
+}
+.hf-combo-upsell--compact .hf-combo-upsell__text { flex: 1; max-width: none; }
+.hf-combo-upsell--compact .hf-combo-upsell__text strong { color: var(--wp--preset--color--primary-dark); }
+.hf-combo-upsell__icon {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	border-radius: 50%;
+	background: #fff;
+	color: var(--wp--preset--color--primary);
+}
+.hf-combo-upsell__icon .hf-icon { width: 1.35rem; height: 1.35rem; }
+.hf-combo-upsell__cta { flex: 0 0 auto; padding: 0.7rem 1.5rem; }
+
+@media (max-width: 640px) {
+	/* Más compacto: arriba ya están las pills de categoría y no hay que tapar la grilla. */
+	.hf-combo-upsell { gap: 0.9rem; margin-bottom: 2rem; padding: 1.1rem; }
+	.hf-combo-upsell .hf-eyebrow { display: none; }
+	.hf-combo-upsell__title { margin-top: 0; font-size: 1.4rem; }
+	.hf-combo-upsell__text { font-size: 0.92rem; line-height: 1.45; }
+	.hf-combo-upsell__all { font-size: 0.92rem; }
+
+	/* Varios combos (Fitness): carrusel horizontal para no empujar la grilla hacia abajo. */
+	.hf-combo-upsell:not(.hf-combo-upsell--single) .hf-combo-upsell__list {
+		grid-template-columns: none;
+		grid-auto-flow: column;
+		grid-auto-columns: 88%;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		padding-bottom: 0.35rem;
+		scrollbar-width: thin;
+	}
+	.hf-combo-card { scroll-snap-align: start; }
+	.hf-combo-card__media { width: 68px; }
+	.hf-combo-size { padding-inline: 0.65rem; }
+
+	.hf-combo-upsell--compact { flex-wrap: wrap; }
+	.hf-combo-upsell--compact .hf-combo-upsell__icon { display: none; }
+	.hf-combo-upsell--compact .hf-combo-upsell__text { flex-basis: 100%; }
+	.hf-combo-upsell__cta { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hf-combo-size, .hf-combo-size:hover { transition: none; transform: none; }
+}
+
 /* Paginación del catálogo: mismo lenguaje que las pills de categoría. Sin esto
    /viandas/ mostraba solo la primera página (16 de 169) sin forma de avanzar. */
 .hf-pagination {

@@ -6,6 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 require get_template_directory() . '/inc/checkout.php';
 require get_template_directory() . '/inc/emails.php';
 
+// Mínimo de compra real (lo valida el plugin Min/Max Quantities, ver §2 de CLAUDE.md).
+// Si cambia en el plugin, cambiarlo también acá.
+const HOMEFOOD_MIN_ORDER_TOTAL = 70000;
+
 add_filter( 'body_class', function ( $classes ) {
 	if ( function_exists( 'is_product' ) && is_product() ) {
 		$classes[] = 'hf-product-page-body';
@@ -92,7 +96,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	);
 
 	wp_localize_script( 'homefood-order-progress', 'homefoodOrderRules', [
-		'minimumTotal' => 70000,
+		'minimumTotal' => HOMEFOOD_MIN_ORDER_TOTAL,
 		'minimumUnits' => 7,
 		'storeApiCartUrl' => esc_url_raw( home_url( '/wp-json/wc/store/v1/cart' ) ),
 	] );
@@ -311,6 +315,202 @@ add_filter( 'render_block', function ( $block_content ) {
 		return $block_content;
 	}
 	return str_replace( '[[bestsellers-carousel]]', homefood_bestsellers_carousel_html(), $block_content );
+}, 10, 1 );
+
+/**
+ * Cross-sell de combos en el catálogo: arriba de la grilla de cada categoría aparece
+ * "¿Querés el combo armado?" con los combos de esa línea (Keto → KETOFUEL, Fitness →
+ * POWER MASS / BALANCE / LEANCUT, etc.). Las categorías sin combo propio (tartas,
+ * ensaladas) y "Todas" muestran una franja corta que lleva a todos los combos.
+ *
+ * El mapa va de la categoría que se está viendo a las subcategorías de "Combos". Los
+ * productos, precios e imágenes se leen de WooCommerce, así que si se agrega un combo
+ * a una de esas subcategorías aparece solo. Las subcategorías sin entrada propia
+ * (Con pollo, Empanadas…) heredan la de su categoría madre.
+ *
+ * El catálogo filtra con /viandas/?product_cat=keto, que para WordPress es la tienda
+ * y no un archivo de categoría: por eso la categoría se lee de la query var y no solo
+ * de is_product_category(). Token [[combo-upsell]] en templates/archive-product.html.
+ */
+function homefood_combo_upsell_map() {
+	return [
+		'keto'                     => [ 'combo-ketofuel-sabor-y-saciedad-en-cetosis' ],
+		'fitness'                  => [
+			'combo-power-mass-aumento-de-masa-muscular',
+			'combo-balance-mantenimiento-saludable',
+			'combo-leancut-definicion-y-tonificacion',
+		],
+		'aumento-de-masa-muscular' => [ 'combo-power-mass-aumento-de-masa-muscular' ],
+		'2-mantenimiento'          => [ 'combo-balance-mantenimiento-saludable' ],
+		'3-definicion'             => [ 'combo-leancut-definicion-y-tonificacion' ],
+		'clasicos'                 => [ 'combo-clasico' ],
+		'vegetariano'              => [ 'combos-vegetarianos' ],
+	];
+}
+
+function homefood_current_product_cat() {
+	$term = get_queried_object();
+	if ( $term instanceof WP_Term && 'product_cat' === $term->taxonomy ) {
+		return $term;
+	}
+	$slug = get_query_var( 'product_cat' );
+	if ( ! is_string( $slug ) || '' === $slug ) {
+		return null;
+	}
+	$term = get_term_by( 'slug', sanitize_title( $slug ), 'product_cat' );
+	return $term instanceof WP_Term ? $term : null;
+}
+
+/** Combos publicados y comprables de una subcategoría, ordenados por cantidad de viandas. */
+function homefood_combo_products( $cat_slug ) {
+	$products = array_filter(
+		wc_get_products( [
+			'status'   => 'publish',
+			'limit'    => 20,
+			'category' => [ $cat_slug ],
+		] ),
+		function ( $product ) {
+			return $product->is_visible() && $product->is_purchasable() && $product->is_in_stock();
+		}
+	);
+
+	$items = [];
+	foreach ( $products as $product ) {
+		$units   = preg_match( '/(\d+)\s*viandas/i', $product->get_name(), $m ) ? (int) $m[1] : 0;
+		$items[] = [
+			'product' => $product,
+			'units'   => $units,
+			'price'   => (float) wc_get_price_to_display( $product ),
+		];
+	}
+	usort( $items, function ( $a, $b ) {
+		return [ $a['units'], $a['price'] ] <=> [ $b['units'], $b['price'] ];
+	} );
+	return $items;
+}
+
+function homefood_combo_upsell_html() {
+	if ( ! function_exists( 'wc_get_products' ) || is_search() ) {
+		return '';
+	}
+
+	$combos_term = get_term_by( 'slug', 'combos', 'product_cat' );
+	$current     = homefood_current_product_cat();
+
+	// En la propia categoría Combos (o sus subcategorías) no tiene sentido.
+	if ( $current && $combos_term && ( $current->term_id === $combos_term->term_id || term_is_ancestor_of( $combos_term, $current, 'product_cat' ) ) ) {
+		return '';
+	}
+
+	$map        = homefood_combo_upsell_map();
+	$line_slugs = [];
+	for ( $term = $current; $term instanceof WP_Term; $term = $term->parent ? get_term( $term->parent, 'product_cat' ) : null ) {
+		if ( isset( $map[ $term->slug ] ) ) {
+			$line_slugs = $map[ $term->slug ];
+			break;
+		}
+	}
+
+	$all_url = home_url( '/viandas/?product_cat=combos' );
+
+	$lines = [];
+	foreach ( $line_slugs as $slug ) {
+		$line_term = get_term_by( 'slug', $slug, 'product_cat' );
+		$items     = $line_term ? homefood_combo_products( $slug ) : [];
+		if ( $items ) {
+			$lines[] = [ 'term' => $line_term, 'items' => $items ];
+		}
+	}
+
+	// Sin combo propio para esta categoría (o "Todas"): franja corta hacia todos los combos.
+	if ( ! $lines ) {
+		$all = $combos_term ? homefood_combo_products( 'combos' ) : [];
+		if ( ! $all ) {
+			return '';
+		}
+		$reaches_min = min( wp_list_pluck( $all, 'price' ) ) >= HOMEFOOD_MIN_ORDER_TOTAL;
+		ob_start();
+		?>
+		<aside class="hf-combo-upsell hf-combo-upsell--compact" aria-label="Combos armados">
+			<span class="hf-combo-upsell__icon"><?php echo homefood_icon_svg( 'package' ); ?></span>
+			<p class="hf-combo-upsell__text">
+				<strong>¿Querés el combo armado?</strong>
+				Packs de viandas ya elegidas: clásicas, vegetarianas, keto, fitness y SIBO.<?php echo $reaches_min ? ' Con cualquiera ya llegás al mínimo de compra.' : ''; ?>
+			</p>
+			<a class="hf-btn hf-btn--accent hf-combo-upsell__cta" href="<?php echo esc_url( $all_url ); ?>">Ver combos</a>
+		</aside>
+		<?php
+		return ob_get_clean();
+	}
+
+	$all_items   = array_merge( ...array_column( $lines, 'items' ) );
+	$units       = array_values( array_unique( array_filter( wp_list_pluck( $all_items, 'units' ) ) ) );
+	sort( $units );
+	$reaches_min = min( wp_list_pluck( $all_items, 'price' ) ) >= HOMEFOOD_MIN_ORDER_TOTAL;
+
+	$text = 'Elegimos los platos por vos';
+	if ( $units ) {
+		$last  = array_pop( $units );
+		$text .= ': ' . ( $units ? implode( ', ', $units ) . ' o ' : '' ) . $last . ' viandas listas para pedir.';
+	} else {
+		$text .= ', listos para pedir.';
+	}
+	if ( $reaches_min ) {
+		$text .= ' Con cualquier combo ya llegás al mínimo de compra.';
+	}
+
+	ob_start();
+	?>
+	<section class="hf-combo-upsell<?php echo 1 === count( $lines ) ? ' hf-combo-upsell--single' : ''; ?>" aria-labelledby="hf-combo-upsell-title">
+		<div class="hf-combo-upsell__head">
+			<div>
+				<span class="hf-eyebrow">Combos armados</span>
+				<h2 class="hf-combo-upsell__title" id="hf-combo-upsell-title">¿Querés el combo armado?</h2>
+				<p class="hf-combo-upsell__text"><?php echo esc_html( $text ); ?></p>
+			</div>
+			<a class="hf-combo-upsell__all" href="<?php echo esc_url( $all_url ); ?>">Ver todos los combos <span aria-hidden="true">→</span></a>
+		</div>
+		<ul class="hf-combo-upsell__list">
+			<?php foreach ( $lines as $line ) :
+				$parts   = preg_split( '/\s+[-–—]\s+/u', $line['term']->name, 2 );
+				$first   = $line['items'][0]['product'];
+				?>
+				<li class="hf-combo-card">
+					<a class="hf-combo-card__media" href="<?php echo esc_url( $first->get_permalink() ); ?>" tabindex="-1" aria-hidden="true">
+						<?php echo $first->get_image( 'woocommerce_thumbnail', [ 'alt' => '' ] ); ?>
+					</a>
+					<div class="hf-combo-card__body">
+						<h3 class="hf-combo-card__name"><?php echo esc_html( $parts[0] ); ?></h3>
+						<?php if ( ! empty( $parts[1] ) ) : ?>
+							<p class="hf-combo-card__tagline"><?php echo esc_html( $parts[1] ); ?></p>
+						<?php endif; ?>
+					</div>
+					<div class="hf-combo-card__sizes">
+						<?php foreach ( $line['items'] as $item ) :
+							$count_label = $item['units'] ? $item['units'] . ' viandas' : $item['product']->get_name();
+							?>
+							<a class="hf-combo-size" href="<?php echo esc_url( $item['product']->get_permalink() ); ?>" aria-label="<?php echo esc_attr( $item['product']->get_name() ); ?>">
+								<span class="hf-combo-size__count"><?php echo esc_html( $count_label ); ?></span>
+								<span class="hf-combo-size__price"><?php echo wc_price( $item['price'] ); ?></span>
+								<?php if ( $item['units'] ) : ?>
+									<span class="hf-combo-size__unit"><?php echo wc_price( $item['price'] / $item['units'], [ 'decimals' => 0 ] ); ?> c/u</span>
+								<?php endif; ?>
+							</a>
+						<?php endforeach; ?>
+					</div>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	</section>
+	<?php
+	return ob_get_clean();
+}
+
+add_filter( 'render_block', function ( $block_content ) {
+	if ( is_admin() || empty( $block_content ) || strpos( $block_content, '[[combo-upsell]]' ) === false ) {
+		return $block_content;
+	}
+	return str_replace( '[[combo-upsell]]', homefood_combo_upsell_html(), $block_content );
 }, 10, 1 );
 
 /**
