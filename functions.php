@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require get_template_directory() . '/inc/checkout.php';
+require get_template_directory() . '/inc/emails.php';
 
 add_filter( 'body_class', function ( $classes ) {
 	if ( function_exists( 'is_product' ) && is_product() ) {
